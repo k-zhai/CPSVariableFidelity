@@ -1,0 +1,196 @@
+file 18014 1560182715                                           
+version 2
+run General-0-20190610-11:00:38-36916
+attr configname General
+attr datetime 20190610-11:00:38
+attr experiment General
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvarsf ""
+attr measurement ""
+attr network networksim
+attr processid 36916
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+param **.numApps 1
+param *.client.app[*].typename "\"TcpSessionApp\""
+param *.client.app[*].connectAddress "\"server\""
+param *.client.app[*].tOpen 0.2s
+param *.client.app[*].tSend 0.4s
+param *.client.app[*].sendBytes 1000000B
+param *.client.app[*].tClose 25s
+param *.server.app[*].typename "\"TcpEchoApp\""
+param **.ppp[*].ppp.queue.typename "\"DropTailQueue\""
+param **.ppp[*].queue.frameCapacity 10
+param **.forwarding true
+
+vector 0 networksim.client.ppp[0].queue queueLength:vector ETV
+attr interpolationmode sample-hold
+attr title "queue length, vector"
+vector 1 networksim.client.ppp[0].ppp transmissionState:vector ETV
+attr interpolationmode sample-hold
+attr source transmissionStateChanged
+attr title "tx state, vector"
+vector 2 networksim.server.ppp[0].queue queueLength:vector ETV
+attr interpolationmode sample-hold
+attr title "queue length, vector"
+vector 3 networksim.server.ppp[0].ppp transmissionState:vector ETV
+attr interpolationmode sample-hold
+attr source transmissionStateChanged
+attr title "tx state, vector"
+vector 4 networksim.client.tcp tcpRcvQueueBytes ETV
+vector 5 networksim.client.tcp "advertised window" ETV
+vector 6 networksim.client.tcp "receive window" ETV
+vector 7 networksim.client.tcp "sent ack" ETV
+vector 8 networksim.client.ppp[0].queue packetReceived:vector(packetBytes) ETV
+attr interpolationmode none
+attr title "received packets, vector(packetBytes)"
+vector 9 networksim.client.ppp[0].queue queueingTime:vector ETV
+attr interpolationmode none
+attr title "queueing time, vector"
+vector 10 networksim.client.ppp[0].ppp rcvdPkFromHl:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceivedFromUpper
+attr title "packets received from higher layer, vector(packetBytes)"
+vector 11 networksim.client.ppp[0].ppp txPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToLower
+attr title "packets transmitted, vector(packetBytes)"
+vector 12 networksim.server.ppp[0].ppp rxPkOk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rxPkOk
+attr title "packets received OK, vector(packetBytes)"
+vector 13 networksim.server.ppp[0].ppp passedUpPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToUpper
+attr title "packets passed to higher layer, vector(packetBytes)"
+vector 14 networksim.server.tcp "rcvd seq" ETV
+vector 15 networksim.server.tcp "rcvd ack" ETV
+vector 16 networksim.server.tcp "advertised window" ETV
+vector 17 networksim.server.tcp "send window" ETV
+vector 18 networksim.server.tcp tcpRcvQueueBytes ETV
+vector 19 networksim.server.tcp "receive window" ETV
+vector 20 networksim.server.tcp "sent ack" ETV
+vector 21 networksim.server.ppp[0].queue packetReceived:vector(packetBytes) ETV
+attr interpolationmode none
+attr title "received packets, vector(packetBytes)"
+vector 22 networksim.server.ppp[0].queue queueingTime:vector ETV
+attr interpolationmode none
+attr title "queueing time, vector"
+vector 23 networksim.server.ppp[0].ppp rcvdPkFromHl:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceivedFromUpper
+attr title "packets received from higher layer, vector(packetBytes)"
+vector 24 networksim.server.ppp[0].ppp txPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToLower
+attr title "packets transmitted, vector(packetBytes)"
+vector 25 networksim.client.ppp[0].ppp rxPkOk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rxPkOk
+attr title "packets received OK, vector(packetBytes)"
+vector 26 networksim.client.ppp[0].ppp passedUpPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToUpper
+attr title "packets passed to higher layer, vector(packetBytes)"
+vector 27 networksim.client.tcp "rcvd seq" ETV
+vector 28 networksim.client.tcp "rcvd ack" ETV
+vector 29 networksim.client.tcp "send window" ETV
+vector 30 networksim.server.tcp "unacked bytes" ETV
+vector 31 networksim.client.app[0] packetSent:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSent
+attr title "packets sent, vector(packetBytes)"
+vector 32 networksim.client.tcp "sent seq" ETV
+vector 33 networksim.client.tcp "unacked bytes" ETV
+vector 34 networksim.server.tcp "rcvd dupAcks" ETV
+vector 35 networksim.server.app[0] packetReceived:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceived
+attr title "packets received, vector(packetBytes)"
+vector 36 networksim.server.app[0] endToEndDelay:vector ETV
+attr interpolationmode none
+attr source dataAge(packetReceived)
+attr title "end-to-end delay, vector"
+attr unit s
+vector 37 networksim.server.app[0] packetSent:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSent
+attr title "packets sent, vector(packetBytes)"
+vector 38 networksim.server.tcp "sent seq" ETV
+vector 39 networksim.client.tcp "measured RTT" ETV
+vector 40 networksim.client.tcp "smoothed RTT" ETV
+vector 41 networksim.client.tcp RTTVAR ETV
+vector 42 networksim.client.tcp RTO ETV
+vector 43 networksim.client.tcp cwnd ETV
+vector 44 networksim.client.tcp "rcvd dupAcks" ETV
+vector 45 networksim.client.app[0] packetReceived:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceived
+attr title "packets received, vector(packetBytes)"
+vector 46 networksim.client.app[0] endToEndDelay:vector ETV
+attr interpolationmode none
+attr source dataAge(packetReceived)
+attr title "end-to-end delay, vector"
+attr unit s
+vector 47 networksim.server.tcp "measured RTT" ETV
+vector 48 networksim.server.tcp "smoothed RTT" ETV
+vector 49 networksim.server.tcp RTTVAR ETV
+vector 50 networksim.server.tcp RTO ETV
+vector 51 networksim.server.tcp cwnd ETV
+0	6112 471 0 231 0 0.8748 29 0 8 114 606
+1	6583 472 0 232 0 0.8748 30 0 1 15 15
+2	7055 225 0 224 0 0.84816 14 0 3 15 31
+3	7280 417 0 217 0 0.8444 26 0 1 13 13
+4	7697 401 3 227 0.2 0.8644 25 0 0 0 0
+5	8098 438 3 227 0.2 0.8644 22 7504 65669 1361897 87418455917
+6	8536 398 3 227 0.2 0.8644 21 7504 7504 157584 1182510336
+7	8934 415 3 227 0.2 0.8644 21 0 58165 1140788 65079573652
+8	9349 371 5 230 0.2 0.8644 21 40 576 8884 4986576
+9	9720 301 5 231 0.2 0.8748 15 0 0.14656 0.77064 0.0687766976
+10	10021 275 6 232 0.2 0.8748 15 40 576 5964 3326096
+11	10296 275 6 232 0.2 0.8748 15 47 583 6069 3410327
+12	10571 246 8 218 0.22408 0.84816 13 47 583 4903 2730549
+13	10817 246 8 218 0.22408 0.84816 13 40 576 4812 2662544
+14	11063 278 10 220 0.22408 0.84816 13 49999 53752 674119 34982862113
+15	11341 274 10 220 0.22408 0.84816 13 0 57629 679220 38448694940
+16	11615 364 10 220 0.22408 0.84816 17 57504 61792 1015624 60711191744
+17	11979 102 10 202 0.22408 0.80152 5 7504 7504 37520 281550080
+18	12081 418 10 220 0.22408 0.84816 24 0 0 0 0
+19	12499 327 10 220 0.22408 0.84816 16 7504 7504 120064 900960256
+20	12826 343 10 220 0.22408 0.84816 16 50000 54288 838056 43925977024
+21	13169 302 12 224 0.22408 0.84816 16 40 576 4396 2337168
+22	13471 254 12 216 0.22408 0.8444 13 0 0.04664 0.14744 0.006554144
+23	13725 243 13 217 0.22408 0.8444 13 40 576 3204 1672016
+24	13968 243 13 217 0.22408 0.8444 13 47 583 3295 1717509
+25	14211 225 15 225 0.24816 0.8644 12 47 583 2712 1377620
+26	14436 225 15 225 0.24816 0.8644 12 40 576 2628 1340240
+27	14661 257 17 227 0.24816 0.8644 12 56020 57629 682971 38876146883
+28	14918 257 17 227 0.24816 0.8644 12 50000 53752 622512 32310957568
+29	15175 163 17 209 0.24816 0.81776 8 7504 7504 60032 450480128
+30	15338 156 25 202 0.27192 0.80152 8 0 2144 6968 10055360
+31	15494 19 29 29 0.4 0.4 1 1000000 1000000 1000000 1000000000000
+32	15513 317 30 209 0.4 0.81776 15 50000 57504 806280 43419605440
+33	15830 297 30 209 0.4 0.81776 15 0 4288 30552 84752320
+34	16127 192 37 220 0.46664 0.84816 11 0 0 0 0
+35	16319 155 38 221 0.46664 0.84816 8 536 536 4288 2298368
+36	16474 185 38 221 0.46664 0.84816 8 0.06664 0.44816 2.17168 0.7023195136
+37	16659 155 38 221 0.46664 0.84816 8 536 536 4288 2298368
+38	16814 151 40 202 0.46664 0.80152 7 56021 59237 403403 23255755775
+39	16965 66 49 147 0.4904 0.72448 3 0.0904 0.14368 0.32448 0.0369882624
+40	17031 74 49 147 0.4904 0.72448 3 0.0113 0.0364990625 0.0689865625 0.0019087817196289
+41	17105 77 49 147 0.4904 0.72448 3 0.53505609375 0.66755 1.79659984375 1.0847366009981
+42	17182 74 49 147 0.4904 0.72448 3 2.1767234375 2.6815 7.2553859375 17.674955224768
+43	17256 143 49 209 0.4904 0.81776 7 1072 4288 18760 58321088
+44	17399 192 49 227 0.4904 0.8644 11 0 0 0 0
+45	17591 78 61 228 0.53704 0.8644 4 536 536 2144 1149184
+46	17669 93 61 228 0.53704 0.8644 4 0.13704 0.4644 1.19624 0.4124284864
+47	17762 46 95 194 0.60744 0.79776 2 0.1408 0.19032 0.33112 0.0560463424
+48	17808 46 95 194 0.60744 0.79776 2 0.0176 0.03919 0.05679 0.0018456161
+49	17854 50 95 194 0.60744 0.79776 2 0.61120875 0.67385 1.28505875 0.82764995857656
+50	17904 46 95 194 0.60744 0.79776 2 2.484025 2.713 5.197025 13.530749200625
+51	17950 62 95 202 0.60744 0.80152 3 1072 2144 4824 8331584
+
