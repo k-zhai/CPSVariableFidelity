@@ -26,6 +26,7 @@ class INET_API Server : public cSimpleModule, public LifecycleUnsupported {
     TcpSocket socket;
     simtime_t delay;
     simtime_t maxMsgDelay;
+    simtime_t propagationDelay;
 
     long msgsRcvd;
     long msgsSent;
@@ -46,8 +47,8 @@ class INET_API Server : public cSimpleModule, public LifecycleUnsupported {
     virtual void finish() override;
     virtual void refreshDisplay() const override;
 
-    virtual void changeRoute();
-    virtual void flushQueue();
+    void changeRoute();
+    void flushQueue();
 };
 
 #endif /* SERVER_H_ */

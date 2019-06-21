@@ -24,7 +24,7 @@
 
 namespace research {
 
-class INET_API Client : public TcpAppBase {
+class INET_API Client : public cSimpleModule, public TcpAppBase {
 
     protected:
         cMessage *timeoutMsg = nullptr;
@@ -50,9 +50,9 @@ class INET_API Client : public TcpAppBase {
         virtual void handleStopOperation(LifecycleOperation *operation) override;
         virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
-        virtual void changeNetworkConfig();
-
         virtual void close() override;
+
+        void appDataArrived(cMessage *msg);
 
     public:
         Client() {}

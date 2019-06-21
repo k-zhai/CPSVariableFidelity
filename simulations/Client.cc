@@ -82,6 +82,8 @@ void Client::sendRequest()
     if (replyLength < 1)
         replyLength = 1;
 
+    switchAppLayer = par("switch");
+
     const auto& payload = makeShared<GenericAppMsg>();
     Packet *packet = new Packet("data");
     payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
@@ -93,7 +95,11 @@ void Client::sendRequest()
     EV_INFO << "sending request with " << requestLength << " bytes, expected reply length " << replyLength << " bytes,"
             << "remaining " << numRequestsToSend - 1 << " request\n";
 
-    sendPacket(packet);
+    if (switchAppLayer) {
+        sendDirect(packet, gate("appOut"));
+    } else {
+        sendPacket(packet);
+    }
 }
 
 void Client::handleTimer(cMessage *msg)
@@ -151,6 +157,11 @@ void Client::rescheduleOrDeleteTimer(simtime_t d, short int msgKind)
     }
 }
 
+void Client::appDataArrived(Packet *msg) {
+    receive();
+    check_and_cast<Packet*>(msg);
+}
+
 void Client::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
     TcpAppBase::socketDataArrived(socket, msg, urgent);
@@ -194,14 +205,6 @@ void Client::socketFailure(TcpSocket *socket, int code)
     if (timeoutMsg) {
         simtime_t d = simTime() + par("reconnectInterval");
         rescheduleOrDeleteTimer(d, MSGKIND_CONNECT);
-    }
-}
-
-void Client::changeNetworkConfig()
-{
-    switchAppLayer = par("appLayerSwitch");
-    if (switchAppLayer) {
-
     }
 }
 

@@ -23,5 +23,5 @@ module newStandardHost extends ApplicationLayerNodeBase
         @figure[submodules];
         forwarding = default(false);
         ipv4.configurator.routingTableModule = default("^.ipv4.routingTable");
-        bool appLayerSwitch = default(false);
+        bool switch = default(false);
 }

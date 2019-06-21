@@ -91,7 +91,11 @@ void Server::sendBack(cMessage *msg)
 
 void Server::handleMessage(cMessage *msg)
 {
-    if (msg->isSelfMessage()) {
+    switchAppLayer = par("switch");
+    if (switchAppLayer) {
+        changeRoute(msg);
+    }
+    else if (msg->isSelfMessage()) {
         sendBack(msg);
     }
     else if (msg->getKind() == TCP_I_PEER_CLOSED) {
@@ -169,21 +173,11 @@ void Server::finish()
     EV_INFO << getFullPath() << ": received " << bytesRcvd << " bytes in " << msgsRcvd << " packets\n";
 }
 
-void Server::changeRoute(ChunkQueue &queue) {
-    switchAppLayer = par("appLayerSwitch");
-    if (switchAppLayer) {
-        const char *localAddress = par("localAddress");
-        int localPort = par("localPort");
-        socket.setOutputGate(gate("appOut"));
-        socket.bind('', localPort); //change
-        socket.listen();
-
-        cModule *node = findContainingNode(this);
-        NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
-        bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (!isOperational)
-            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+void Server::changeRoute(cMessage* msg) {
+    if (!(msg->isSelfMessage())) {
+        scheduleAt(simTime() + propagationDelay, msg);
     }
+    sendDirect(msg, gate("appOut"));
 }
 
 //void Server::flushQueue(ChunkQueue &queue) {
