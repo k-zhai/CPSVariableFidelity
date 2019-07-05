@@ -13,32 +13,68 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef CLIENT_H_
-#define CLIENT_H_
+#ifndef SENSORNODEBASE_H_
+#define SENSORNODEBASE_H_
 
 #include "inet/common/INETDefs.h"
 
 #include "inet/applications/tcpapp/TcpAppBase.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
+#include "inet/common/packet/ChunkQueue.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
-namespace research {
+namespace inet {
 
-class INET_API Client : public cSimpleModule, public TcpAppBase {
+enum msgKind {
+    APP_SELF_MSG = 11,
+    APP_MSG_SENT = 12,
+    APP_MSG_RETURNED = 13,
+    TIMER = 14
+};
+
+class INET_API SensorNodeBase: public cSimpleModule, public TcpAppBase, public LifecycleUnsupported {
 
     protected:
+
+        TcpSocket socket;
+        simtime_t delay;
+        simtime_t maxMsgDelay;
+
+        simtime_t propagationDelay = 0.01s; // placeholder
+        simtime_t frequency = 2s; // placeholder
+
+        long msgsRcvd;
+        long msgsSent;
+        long bytesRcvd;
+        long bytesSent;
+
+        std::map<int, ChunkQueue> socketQueue;
+
         cMessage *timeoutMsg = nullptr;
         bool earlySend = false;    // if true, don't wait with sendRequest() until established()
         int numRequestsToSend = 0;    // requests to send in this session
         simtime_t startTime;
         simtime_t stopTime;
-        bool switchAppLayer;
+
+    protected:
+
+        SensorNodeBase();
+        virtual ~SensorNodeBase();
+
+        virtual void sendBack(cMessage *msg);
+        virtual void sendOrSchedule(cmessage *msg, simtime_t delay);
+
+        virtual void initialize(int stage) override;
+        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+        virtual void handleMessage(cMessage *msg) override;
+        virtual void finish() override;
+        virtual void refreshDisplay() const override;
 
         virtual void sendRequest();
         virtual void rescheduleOrDeleteTimer(simtime_t d, short int msgKind);
 
-        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage) override;
         virtual void handleTimer(cMessage *msg) override;
 
         virtual void socketEstablished(TcpSocket *socket) override;
@@ -50,16 +86,13 @@ class INET_API Client : public cSimpleModule, public TcpAppBase {
         virtual void handleStopOperation(LifecycleOperation *operation) override;
         virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
+        void delayedMsgSend(cMessage* msg);
+        void finalMsgSend(cMessage* msg, const char* module);
+        void msgReturn(cMessage* msg);
+
         virtual void close() override;
-
-        void appDataArrived(cMessage *msg);
-
-    public:
-        Client() {}
-        virtual ~Client();
-    };
+};
 
 }
 
-#endif /* CLIENT_H_ */
-
+#endif /* SENSORNODEBASE_H_ */

@@ -13,17 +13,17 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package research.simulations;
+#ifndef SENSORNODE_H_
+#define SENSORNODE_H_
 
-import inet.node.base.ApplicationLayerNodeBase;
+#include "../SensorNodeBase.h"
 
-module newStandardHost extends ApplicationLayerNodeBase
-{
-    parameters:
-        @display("i=device/pc2");
-        @figure[submodules];
-        forwarding = default(false);  // disable routing by default
-        ipv4.arp.proxyArpInterfaces = default(""); // proxy arp is disabled on hosts by default
-        *.routingTableModule = default("^.ipv4.routingTable");
-        
+namespace research {
+
+class INET_API SensorNode: public SensorNodeBase  {
+
+};
+
 }
+
+#endif /* SENSORNODE_H_ */

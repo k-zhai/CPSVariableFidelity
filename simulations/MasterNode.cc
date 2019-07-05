@@ -13,17 +13,14 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package research.simulations;
+#include "MasterNode.h"
 
-import inet.node.base.ApplicationLayerNodeBase;
+MasterNode::MasterNode() {
+    // TODO Auto-generated constructor stub
 
-module newStandardHost extends ApplicationLayerNodeBase
-{
-    parameters:
-        @display("i=device/pc2");
-        @figure[submodules];
-        forwarding = default(false);  // disable routing by default
-        ipv4.arp.proxyArpInterfaces = default(""); // proxy arp is disabled on hosts by default
-        *.routingTableModule = default("^.ipv4.routingTable");
-        
 }
+
+MasterNode::~MasterNode() {
+    // TODO Auto-generated destructor stub
+}
+

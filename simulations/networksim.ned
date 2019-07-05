@@ -34,13 +34,17 @@ network networksim
             per = per;
         }
     submodules:
-        client: newStandardHost {
+        SN1: newStandardHost {
             parameters:
                 @display("p=114,223;i=device/pc");
         }
-        server: newStandardHost {
+        SN2: newStandardHost {
             parameters:
-                @display("p=714,223;i=device/server");
+                @display("p=714,223;i=device/pc");
+        }
+        Master: newStandardHost {
+            parameters:
+                @display("i=device/pc;p=397.5925,363.25998");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
@@ -51,6 +55,10 @@ network networksim
                 @display("p=227.03749,99.674995;is=s");
         }
     connections:
-        client.pppg++ <--> C <--> server.pppg++;
+        SN1.pppg++ <--> C <--> SN2.pppg++;
+//        Client.appOut --> Server.appIn;
+//        Client.appIn <-- Server.appOut;
+//        Client.socketOut --> C --> Server.socketIn;
+//        Client.socketIn <-- C <-- Server.socketOut;
 
 }
