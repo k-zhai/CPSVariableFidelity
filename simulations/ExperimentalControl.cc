@@ -14,6 +14,12 @@
 // 
 
 #include "ExperimentalControl.h"
+#include "inet/common/packet/Message.h"
+
+namespace inet {
+
+#define START_MSG   0
+#define END_MSG     1
 
 static ExperimentalControl* ExperimentalControl::getInstance() {
     if (!instance) {
@@ -26,9 +32,21 @@ bool ExperimentalControl::getState() {
     return this->state;
 }
 
-void ExperimentalControl::setState(bool s) {
-    if (!(this->state) == s) {
-        this->state = s;
+void ExperimentalControl::setState() {
+    if (currentLayer == newLayer) return;
+    cMessage* startMsg = new cMessage(START_MSG);
+    cMessage* endMsg = new cMessage(END_MSG);
+    scheduleAt(startTime, startMsg);
+    scheduleAt(endTime, endMsg);
+}
+
+void ExperimentalControl::handleMessage(cMessage* msg) {
+    if (msg->getKind() == START_MSG && msg->isSelfMessage()) {
+        this->state = true;
+    } else if (msg->getKind() == END_MSG && msg->isSelfMessage()) {
+        this->state = false;
     }
+}
+
 }
 

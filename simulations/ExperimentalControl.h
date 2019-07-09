@@ -16,22 +16,31 @@
 #ifndef EXPERIMENTALCONTROL_H_
 #define EXPERIMENTALCONTROL_H_
 
+namespace inet {
+
 class ExperimentalControl {
 
     static ExperimentalControl* instance;
 
     private:
-        bool state;
-        ExperimentalControl() {
-            state = par("switch"); // switch defined in ExperimentalControl.ned
-        }
+        bool state = par("switch");
+        ExperimentalControl() {}
+
+    protected:
+        int currentLayer;
+        int newLayer;
+        simtime_t startTime;
+        simtime_t endTime;
 
     public:
         ~ExperimentalControl() = default;
         static ExperimentalControl* getInstance();
 
         bool getState();
-        void setState(bool s);
-    };
+        void setState();
+        void handleMessage(cMessage* msg);
+};
+
+}
 
 #endif /* EXPERIMENTALCONTROL_H_ */

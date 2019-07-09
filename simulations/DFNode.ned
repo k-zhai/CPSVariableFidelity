@@ -13,14 +13,9 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "SensorNode.h"
+package research.simulations;
 
-SensorNode::SensorNode() {
-    // TODO Auto-generated constructor stub
-
+simple DFNode extends SensorNodeBase
+{
+    
 }
-
-SensorNode::~SensorNode() {
-    // TODO Auto-generated destructor stub
-}
-

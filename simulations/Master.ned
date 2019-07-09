@@ -13,17 +13,9 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef SENSORNODE_H_
-#define SENSORNODE_H_
+package research.simulations;
 
-#include "../SensorNodeBase.h"
-
-namespace research {
-
-class INET_API SensorNode: public SensorNodeBase  {
-
-};
-
+simple Master extends SensorNodeBase
+{
+    
 }
-
-#endif /* SENSORNODE_H_ */

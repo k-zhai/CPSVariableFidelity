@@ -20,11 +20,12 @@ import inet.common.misc.NetAnimTrace;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import ned.DatarateChannel;
 import *.*.newStandardHost;
+import *.*.ExperimentalControl;
 
 network networksim
 {
     parameters:
-        @display("bgb=882,507");
+        @display("bgb=1003.39496,554.8575");
         double per = default(0);
     types:
         channel C extends DatarateChannel
@@ -42,9 +43,17 @@ network networksim
             parameters:
                 @display("p=714,223;i=device/pc");
         }
-        Master: newStandardHost {
+        DF1: newStandardHost {
             parameters:
-                @display("i=device/pc;p=397.5925,363.25998");
+                @display("p=466.2575,355.5075");
+        }
+        M: newStandardHost {
+            parameters:
+                @display("i=device/pc;p=287.94998,421.9575");
+        }
+        EC: ExperimentalControl {
+            parameters:
+                @display("i=device/pc;p=112.965,421.9575");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:

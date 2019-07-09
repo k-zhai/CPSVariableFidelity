@@ -81,7 +81,7 @@ void SensorNodeBase::initialize(int stage) {
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
-    if (par("switch")) {
+    if (ExperimentalControl::getInstance()->getState()) {
         timeoutMsg = new cMessage(TIMER);
         scheduleAt(simTime() + frequency, timeoutMsg);
     }
@@ -114,7 +114,7 @@ void SensorNodeBase::sendBack(cMessage *msg) {
 }
 
 void SensorNodeBase::handleMessage(cMessage *msg) {
-    if (par("switch")) {
+    if (ExperimentalControl::getInstance()->getState()) {
         if (msg->getKind() == APP_MSG_SENT) {
             msgReturn(msg);
         } else {
@@ -250,10 +250,6 @@ void SensorNodeBase::sendRequest()
 void SensorNodeBase::handleTimer(cMessage *msg)
 {
     switch (msg->getKind()) {
-//        case TIMER:
-//            msg->setKind(APP_SELF_MSG);
-//            scheduleAt(simTime() + propagationDelay, msg);
-//            break;
 
         case MSGKIND_CONNECT:
             connect();    // active OPEN
