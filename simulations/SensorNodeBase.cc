@@ -3,19 +3,19 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
-#include "../SensorNodeBase.h"
-#include "../ExperimentalControl.h"
+#include "SensorNodeBase.h"
 
+// #include "ExperimentControl.h"
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/applications/tcpapp/GenericAppMsg_m.h"
 #include "inet/common/ModuleAccess.h"
@@ -35,12 +35,17 @@ namespace inet {
 #define MSGKIND_CONNECT    0
 #define MSGKIND_SEND       1
 
+#define START_MSG          20
+#define END_MSG            21
+
 Define_Module(SensorNodeBase);
 
-ExperimentalControl* ExperimentalControl::instance = 0;
+// ExperimentControl* ExperimentControl::instance = 0;
+
+SensorNodeBase::SensorNodeBase() {}
 
 SensorNodeBase::~SensorNodeBase() {
-    cancelAndDelete(timeoutMsg);
+    cSimpleModule::cancelAndDelete(timeoutMsg);
 }
 
 void SensorNodeBase::initialize(int stage) {
@@ -51,12 +56,10 @@ void SensorNodeBase::initialize(int stage) {
         delay = par("replyDelay");
         maxMsgDelay = 0;
 
-        msgsRcvd = msgsSent = bytesRcvd = bytesSent = 0;
+        msgsRcvd = msgsSent = 0;
 
         WATCH(msgsRcvd);
         WATCH(msgsSent);
-        WATCH(bytesRcvd);
-        WATCH(bytesSent);
 
         numRequestsToSend = 0;
         earlySend = false;
@@ -69,10 +72,6 @@ void SensorNodeBase::initialize(int stage) {
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         timeoutMsg = new cMessage("timer"); // msg name
     } else if (stage == INITSTAGE_APPLICATION_LAYER) {
-        const char *localAddress = par("localAddress");
-        int localPort = par("localPort");
-        socket.setOutputGate(gate("socketOut"));
-        socket.bind(localAddress[0] ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
         socket.listen();
 
         cModule *node = findContainingNode(this);
@@ -81,10 +80,19 @@ void SensorNodeBase::initialize(int stage) {
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
-    if (ExperimentalControl::getInstance()->getState()) {
-        timeoutMsg = new cMessage(TIMER);
-        scheduleAt(simTime() + frequency, timeoutMsg);
-    }
+
+//    ExperimentControl::getInstance()->setState();
+//    cMessage* timeout = new cMessage(TIMER);
+//    scheduleAt(ExperimentControl::startTime + 0.1s, timeout);
+
+    // temporary
+    cMessage* startMsg = new cMessage(START_MSG);
+    cMessage* endMsg = new cMessage(END_MSG);
+    scheduleAt(start_time, startMsg);
+    scheduleAt(end_time, endMsg);
+
+    cMessage* timeout = new cMessage(TIMER);
+    scheduleAt(start_time + 0.1s, timeout);
 }
 
 void SensorNodeBase::sendOrSchedule(cMessage *msg, simtime_t delay) {
@@ -114,7 +122,33 @@ void SensorNodeBase::sendBack(cMessage *msg) {
 }
 
 void SensorNodeBase::handleMessage(cMessage *msg) {
-    if (ExperimentalControl::getInstance()->getState()) {
+    // temporary
+    if (msg->getKind() == START_MSG && msg->isSelfMessage()) {
+        switch_fidelity = true;
+        return;
+    } else if (msg->getKind() == END_MSG && msg->isSelfMessage()) {
+        switch_fidelity = false;
+        return;
+    }
+
+//    if (ExperimentControl::getInstance()->getState()) {
+//        if (msg->getKind() == APP_MSG_SENT) {
+//            msgReturn(msg);
+//        } else {
+//            if (msg->getKind() == TIMER) {
+//                // Schedule the next TIMER call as well
+//                cMessage* tmMsg = new cMessage(TIMER);
+//                scheduleAt(simTime() + frequency, tmMsg);
+//
+//                // Schedule the message to be finally sent after the approx. propagation delay
+//                delayedMsgSend(msg);
+//            } else {
+//                finalMsgSend(msg, "DF1"); //should not be hard coded string
+//            }
+//        }
+
+    // temporary
+    if (switch_fidelity) {
         if (msg->getKind() == APP_MSG_SENT) {
             msgReturn(msg);
         } else {
@@ -370,13 +404,17 @@ void SensorNodeBase::finalMsgSend(cMessage* msg, const char* module) {
     }
 }
 
+void SensorNodeBase::saveData(cMessage* msg) {
+    delete msg;
+}
+
 void SensorNodeBase::msgReturn(cMessage* msg) {
     if (msg->isSelfMessage) {
         msg->setKind(APP_MSG_RETURNED);
         sendDirect(msg, msg->getSenderModule(), "appIn");
     } else {
         emit(packetReceivedSignal, msg);
-        delete msg;
+        saveData(msg);
         msg = new cMessage(APP_MSG_SENT); // msg kind remains APP_MSG_SENT
         scheduleAt(simTime() + propagationDelay, msg);
     }

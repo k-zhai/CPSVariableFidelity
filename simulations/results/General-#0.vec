@@ -1,36 +1,41 @@
 version 2
-run General-0-20190625-10:36:30-22892
+run General-0-20190715-13:22:27-22444
 attr configname General
-attr datetime 20190625-10:36:30
+attr datetime 20190715-13:22:27
 attr experiment General
 attr inifile omnetpp.ini
 attr iterationvars ""
 attr iterationvarsf ""
 attr measurement ""
-attr network networksim
-attr processid 22892
+attr network networksim2
+attr processid 22444
 attr repetition 0
 attr replication #0
 attr resultdir results
 attr runnumber 0
 attr seedset 0
+param **.numApps 1
 param **.queue.frameCapacity 10
 param **.queue.queueName "\"DropTailQueue\""
-param *.Client.app[*].typename "\"client\""
-param *.Server.app[*].typename "\"server\""
+param *.SN*.app[*].typename "\"TcpBasicClientApp\""
+param *.DF*.app[*].typename "\"TcpGenericServerApp\""
+param *.M.app[*].typename "\"MasterNode\""
+param *.SN1.app[*].connectAddress "\"DF1\""
 param **.switch false
+param **.app[*].thinkTime 0.2s
+param **.app[*].idleInterval 0.1s
 
-vector 0 networksim.Client.ppp[0].queue queueLength:vector ETV
+vector 0 networksim2.SN1.ppp[0].queue queueLength:vector ETV
 attr interpolationmode sample-hold
 attr title "queue length, vector"
-vector 1 networksim.Client.ppp[0].ppp transmissionState:vector ETV
+vector 1 networksim2.SN1.ppp[0].ppp transmissionState:vector ETV
 attr interpolationmode sample-hold
 attr source transmissionStateChanged
 attr title "tx state, vector"
-vector 2 networksim.Server.ppp[0].queue queueLength:vector ETV
+vector 2 networksim2.DF1.ppp[0].queue queueLength:vector ETV
 attr interpolationmode sample-hold
 attr title "queue length, vector"
-vector 3 networksim.Server.ppp[0].ppp transmissionState:vector ETV
+vector 3 networksim2.DF1.ppp[0].ppp transmissionState:vector ETV
 attr interpolationmode sample-hold
 attr source transmissionStateChanged
 attr title "tx state, vector"

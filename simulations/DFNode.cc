@@ -15,12 +15,13 @@
 
 #include "DFNode.h"
 
-DFNode::DFNode() {
-    // TODO Auto-generated constructor stub
+namespace inet {
 
+Define_Module(DFNode);
+
+void DFNode::saveData(cMessage* msg) {
+    data.push_back("data");
+    delete msg;
 }
 
-DFNode::~DFNode() {
-    // TODO Auto-generated destructor stub
 }
-

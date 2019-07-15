@@ -3,15 +3,15 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
 #ifndef SENSORNODEBASE_H_
 #define SENSORNODEBASE_H_
@@ -34,7 +34,7 @@ enum msgKind {
     TIMER = 14
 };
 
-class INET_API SensorNodeBase: public cSimpleModule, public TcpAppBase, public LifecycleUnsupported {
+class SensorNodeBase : public cSimpleModule, public TcpAppBase, public LifecycleUnsupported {
 
     protected:
 
@@ -58,39 +58,47 @@ class INET_API SensorNodeBase: public cSimpleModule, public TcpAppBase, public L
         simtime_t startTime;
         simtime_t stopTime;
 
+        // temporary, until ExperimentControl is fixed
+        static bool switch_fidelity = false;
+        static simtime_t start_time = 10s;
+        static simtime_t end_time = 30s;
+
+
     protected:
 
         SensorNodeBase();
-        virtual ~SensorNodeBase();
+        ~SensorNodeBase();
 
-        virtual void sendBack(cMessage *msg);
-        virtual void sendOrSchedule(cmessage *msg, simtime_t delay);
+        void sendBack(cMessage *msg);
+        void sendOrSchedule(cmessage *msg, simtime_t delay);
 
-        virtual void initialize(int stage) override;
-        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-        virtual void handleMessage(cMessage *msg) override;
-        virtual void finish() override;
-        virtual void refreshDisplay() const override;
+        void initialize(int stage) override;
+        int numInitStages() const override { return NUM_INIT_STAGES; }
+        void handleMessage(cMessage *msg) override;
+        void finish() override;
+        void refreshDisplay() const override;
 
-        virtual void sendRequest();
-        virtual void rescheduleOrDeleteTimer(simtime_t d, short int msgKind);
+        void sendRequest();
+        void rescheduleOrDeleteTimer(simtime_t d, short int msgKind);
 
-        virtual void handleTimer(cMessage *msg) override;
+        void handleTimer(cMessage *msg) override;
 
-        virtual void socketEstablished(TcpSocket *socket) override;
-        virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
-        virtual void socketClosed(TcpSocket *socket) override;
-        virtual void socketFailure(TcpSocket *socket, int code) override;
+        void socketEstablished(TcpSocket *socket) override;
+        void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+        void socketClosed(TcpSocket *socket) override;
+        void socketFailure(TcpSocket *socket, int code) override;
 
-        virtual void handleStartOperation(LifecycleOperation *operation) override;
-        virtual void handleStopOperation(LifecycleOperation *operation) override;
-        virtual void handleCrashOperation(LifecycleOperation *operation) override;
+        void handleStartOperation(LifecycleOperation *operation) override;
+        void handleStopOperation(LifecycleOperation *operation) override;
+        void handleCrashOperation(LifecycleOperation *operation) override;
+
+        void saveData(cMessage* msg) override;
 
         void delayedMsgSend(cMessage* msg);
         void finalMsgSend(cMessage* msg, const char* module);
         void msgReturn(cMessage* msg);
 
-        virtual void close() override;
+        void close() override;
 };
 
 }

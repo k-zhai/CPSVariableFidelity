@@ -13,34 +13,18 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "ExperimentalControl.h"
-#include "inet/common/packet/Message.h"
+#include "ExperimentControl.h"
 
-namespace inet {
+using omnetpp::cMessage;
+
+Define_Module(ExperimentControl);
 
 #define START_MSG   0
 #define END_MSG     1
 
-static ExperimentalControl* ExperimentalControl::getInstance() {
-    if (!instance) {
-        instance = new ExperimentalControl;
-    }
-    return instance;
-}
+void ExperimentControl::initialize() {}
 
-bool ExperimentalControl::getState() {
-    return this->state;
-}
-
-void ExperimentalControl::setState() {
-    if (currentLayer == newLayer) return;
-    cMessage* startMsg = new cMessage(START_MSG);
-    cMessage* endMsg = new cMessage(END_MSG);
-    scheduleAt(startTime, startMsg);
-    scheduleAt(endTime, endMsg);
-}
-
-void ExperimentalControl::handleMessage(cMessage* msg) {
+void ExperimentControl::handleMessage(cMessage* msg) {
     if (msg->getKind() == START_MSG && msg->isSelfMessage()) {
         this->state = true;
     } else if (msg->getKind() == END_MSG && msg->isSelfMessage()) {
@@ -48,5 +32,21 @@ void ExperimentalControl::handleMessage(cMessage* msg) {
     }
 }
 
+static ExperimentControl* ExperimentControl::getInstance() {
+    if (!instance) {
+        instance = new ExperimentControl;
+    }
+    return instance;
 }
 
+bool ExperimentControl::getState() {
+    return this->state;
+}
+
+void ExperimentControl::setState() {
+    if (currentLayer == newLayer) return;
+    cMessage* startMsg = new cMessage(START_MSG);
+    cMessage* endMsg = new cMessage(END_MSG);
+    scheduleAt(startTime, startMsg);
+    scheduleAt(endTime, endMsg);
+}

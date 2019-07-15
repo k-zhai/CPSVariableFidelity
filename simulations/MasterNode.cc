@@ -15,12 +15,14 @@
 
 #include "MasterNode.h"
 
-MasterNode::MasterNode() {
-    // TODO Auto-generated constructor stub
+namespace inet {
 
+Define_Module(MasterNode);
+
+void MasterNode::saveData(cMessage* msg) {
+    data.push_back("data"); // should take data from msg
+    delete msg;
 }
 
-MasterNode::~MasterNode() {
-    // TODO Auto-generated destructor stub
 }
 

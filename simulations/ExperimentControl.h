@@ -13,18 +13,19 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef EXPERIMENTALCONTROL_H_
-#define EXPERIMENTALCONTROL_H_
+#ifndef EXPERIMENTCONTROL_H_
+#define EXPERIMENTCONTROL_H_
 
-namespace inet {
+#include <omnetpp.h>
 
-class ExperimentalControl {
+using namespace omnetpp;
 
-    static ExperimentalControl* instance;
+class ExperimentControl : public cSimpleModule {
 
     private:
+        static ExperimentControl* instance;
         bool state = par("switch");
-        ExperimentalControl() {}
+        ExperimentControl() = default;
 
     protected:
         int currentLayer;
@@ -32,15 +33,15 @@ class ExperimentalControl {
         simtime_t startTime;
         simtime_t endTime;
 
+        virtual void initialize() override;
+        virtual void handleMessage(cMessage* msg) override;
+
     public:
-        ~ExperimentalControl() = default;
-        static ExperimentalControl* getInstance();
+        ~ExperimentControl() = default;
+        static ExperimentControl* getInstance();
 
         bool getState();
         void setState();
-        void handleMessage(cMessage* msg);
 };
 
-}
-
-#endif /* EXPERIMENTALCONTROL_H_ */
+#endif /* EXPERIMENTCONTROL_H_ */

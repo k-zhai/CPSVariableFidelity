@@ -17,13 +17,19 @@
 #define DFNODE_H_
 
 #include "../SensorNodeBase.h"
+#include <vector>
+#include <string>
 
-namespace research {
+namespace inet {
 
 class INET_API DFNode: public SensorNodeBase {
-public:
-    DFNode();
-    virtual ~DFNode();
+
+    protected:
+
+        std::vector<std::string> data;
+
+        void saveData(cMessage* msg);
+
 };
 
 }

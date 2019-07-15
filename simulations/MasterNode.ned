@@ -15,7 +15,7 @@
 
 package research.simulations;
 
-simple Master extends SensorNodeBase
+simple MasterNode extends SensorNodeBase
 {
     
 }

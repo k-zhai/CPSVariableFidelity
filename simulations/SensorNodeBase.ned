@@ -20,6 +20,7 @@ import inet.applications.contract.IApp;
 simple SensorNodeBase like IApp
 {
     parameters:
+    	@class(inet::SensorNodeBase);
         string localAddress = default("");
         int localPort = default(-1);
         string connectAddress = default("");

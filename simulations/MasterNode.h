@@ -17,13 +17,18 @@
 #define MASTERNODE_H_
 
 #include "../SensorNodeBase.h"
+#include <vector>
+#include <string>
 
-namespace research {
+namespace inet {
 
 class INET_API MasterNode: public SensorNodeBase {
-public:
-    MasterNode();
-    virtual ~MasterNode();
+
+    protected:
+
+        std::vector<std::string> data;
+
+        void saveData(cMessage*msg);
 };
 
 }
