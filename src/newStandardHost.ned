@@ -13,24 +13,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef MASTERNODE_H_
-#define MASTERNODE_H_
+package research;
 
-#include "../SensorNodeBase.h"
-#include <vector>
-#include <string>
+import inet.node.base.ApplicationLayerNodeBase;
 
-namespace inet {
-
-class INET_API MasterNode: public SensorNodeBase {
-
-    protected:
-
-        std::vector<std::string> data;
-
-        void saveData(cMessage*msg);
-};
-
+module newStandardHost extends ApplicationLayerNodeBase
+{
+    parameters:
+        @display("i=device/pc2");
+        @figure[submodules];
+        forwarding = default(false);  // disable routing by default
+        ipv4.arp.proxyArpInterfaces = default(""); // proxy arp is disabled on hosts by default
+        *.routingTableModule = default("^.ipv4.routingTable");    
 }
-
-#endif /* MASTERNODE_H_ */

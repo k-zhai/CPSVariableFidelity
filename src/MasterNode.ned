@@ -13,25 +13,9 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef DFNODE_H_
-#define DFNODE_H_
+package research;
 
-#include "../SensorNodeBase.h"
-#include <vector>
-#include <string>
-
-namespace inet {
-
-class INET_API DFNode: public SensorNodeBase {
-
-    protected:
-
-        std::vector<std::string> data;
-
-        void saveData(cMessage* msg);
-
-};
-
+simple MasterNode extends SensorNodeBase
+{
+    
 }
-
-#endif /* DFNODE_H_ */

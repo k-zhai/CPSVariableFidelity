@@ -19,10 +19,10 @@ using omnetpp::cMessage;
 
 Define_Module(ExperimentControl);
 
-#define START_MSG   0
-#define END_MSG     1
+ExperimentControl* ExperimentControl::instance = nullptr;
 
-void ExperimentControl::initialize() {}
+void ExperimentControl::initialize() {
+}
 
 void ExperimentControl::handleMessage(cMessage* msg) {
     if (msg->getKind() == START_MSG && msg->isSelfMessage()) {
@@ -32,7 +32,7 @@ void ExperimentControl::handleMessage(cMessage* msg) {
     }
 }
 
-static ExperimentControl* ExperimentControl::getInstance() {
+ExperimentControl* ExperimentControl::getInstance() {
     if (!instance) {
         instance = new ExperimentControl;
     }
@@ -45,8 +45,8 @@ bool ExperimentControl::getState() {
 
 void ExperimentControl::setState() {
     if (currentLayer == newLayer) return;
-    cMessage* startMsg = new cMessage(START_MSG);
-    cMessage* endMsg = new cMessage(END_MSG);
+    cMessage* startMsg = new cMessage("startMsg", START_MSG);
+    cMessage* endMsg = new cMessage("endMsg", END_MSG);
     scheduleAt(startTime, startMsg);
     scheduleAt(endTime, endMsg);
 }

@@ -8,7 +8,7 @@
 // `license' for details on this and other legal matters.
 //
 
-package research.simulations;
+package research;
 
 simple ExperimentControl
 {

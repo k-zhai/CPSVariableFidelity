@@ -15,7 +15,7 @@
 
 #include "SensorNodeBase.h"
 
-// #include "ExperimentControl.h"
+#include "ExperimentControl.h"
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/applications/tcpapp/GenericAppMsg_m.h"
 #include "inet/common/ModuleAccess.h"
@@ -40,7 +40,9 @@ namespace inet {
 
 Define_Module(SensorNodeBase);
 
-// ExperimentControl* ExperimentControl::instance = 0;
+bool SensorNodeBase::switch_fidelity = false;
+const simtime_t SensorNodeBase::start_time = 10;
+const simtime_t SensorNodeBase::end_time = 30;
 
 SensorNodeBase::SensorNodeBase() {}
 
@@ -86,13 +88,13 @@ void SensorNodeBase::initialize(int stage) {
 //    scheduleAt(ExperimentControl::startTime + 0.1s, timeout);
 
     // temporary
-    cMessage* startMsg = new cMessage(START_MSG);
-    cMessage* endMsg = new cMessage(END_MSG);
+    cMessage* startMsg = new cMessage(nullptr, START_MSG);
+    cMessage* endMsg = new cMessage(nullptr, END_MSG);
     scheduleAt(start_time, startMsg);
     scheduleAt(end_time, endMsg);
 
-    cMessage* timeout = new cMessage(TIMER);
-    scheduleAt(start_time + 0.1s, timeout);
+    cMessage* timeout = new cMessage(nullptr, TIMER);
+    scheduleAt(start_time + 0.1, timeout);
 }
 
 void SensorNodeBase::sendOrSchedule(cMessage *msg, simtime_t delay) {
@@ -154,7 +156,7 @@ void SensorNodeBase::handleMessage(cMessage *msg) {
         } else {
             if (msg->getKind() == TIMER) {
                 // Schedule the next TIMER call as well
-                cMessage* tmMsg = new cMessage(TIMER);
+                cMessage* tmMsg = new cMessage(nullptr, TIMER);
                 scheduleAt(simTime() + frequency, tmMsg);
 
                 // Schedule the message to be finally sent after the approx. propagation delay
@@ -383,10 +385,10 @@ void SensorNodeBase::socketFailure(TcpSocket *socket, int code)
     }
 }
 
-void SensorNodeBase::delayedMsgSend(cMessage* msg, const char* module) {
+void SensorNodeBase::delayedMsgSend(cMessage* msg) {
     if (msg->isSelfMessage() && msg->getKind() == TIMER) {
         delete msg;
-        msg = new cMessage(APP_SELF_MSG);
+        msg = new cMessage(nullptr, APP_SELF_MSG);
         scheduleAt(simTime() + propagationDelay, msg);
     } else {
         error("Must be a self message with kind TIMER");
@@ -396,7 +398,7 @@ void SensorNodeBase::delayedMsgSend(cMessage* msg, const char* module) {
 void SensorNodeBase::finalMsgSend(cMessage* msg, const char* module) {
     if (msg->isSelfMessage() && msg->getKind() == APP_SELF_MSG) {
         delete msg;
-        msg = new cMessage(APP_MSG_SENT);
+        msg = new cMessage(nullptr, APP_MSG_SENT);
         cModule *targetModule = getParentModule()->getSubmodule(module);
         sendDirect(msg, targetModule, "appIn");
     } else {
@@ -409,13 +411,13 @@ void SensorNodeBase::saveData(cMessage* msg) {
 }
 
 void SensorNodeBase::msgReturn(cMessage* msg) {
-    if (msg->isSelfMessage) {
+    if (msg->isSelfMessage()) {
         msg->setKind(APP_MSG_RETURNED);
         sendDirect(msg, msg->getSenderModule(), "appIn");
     } else {
         emit(packetReceivedSignal, msg);
         saveData(msg);
-        msg = new cMessage(APP_MSG_SENT); // msg kind remains APP_MSG_SENT
+        msg = new cMessage(nullptr, APP_MSG_SENT); // msg kind remains APP_MSG_SENT
         scheduleAt(simTime() + propagationDelay, msg);
     }
 }

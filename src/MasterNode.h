@@ -13,35 +13,24 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef EXPERIMENTCONTROL_H_
-#define EXPERIMENTCONTROL_H_
+#ifndef MASTERNODE_H_
+#define MASTERNODE_H_
 
-#include <omnetpp.h>
+#include "SensorNodeBase.h"
+#include <vector>
+#include <string>
 
-using namespace omnetpp;
+namespace inet {
 
-class ExperimentControl : public cSimpleModule {
-
-    private:
-        static ExperimentControl* instance;
-        bool state = par("switch");
-        ExperimentControl() = default;
+class MasterNode: public SensorNodeBase {
 
     protected:
-        int currentLayer;
-        int newLayer;
-        simtime_t startTime;
-        simtime_t endTime;
-
-        virtual void initialize() override;
-        virtual void handleMessage(cMessage* msg) override;
+        std::vector<std::string> data;
 
     public:
-        ~ExperimentControl() = default;
-        static ExperimentControl* getInstance();
-
-        bool getState();
-        void setState();
+        void saveData(cMessage*msg);
 };
 
-#endif /* EXPERIMENTCONTROL_H_ */
+}
+
+#endif /* MASTERNODE_H_ */

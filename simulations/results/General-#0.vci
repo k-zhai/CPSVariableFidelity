@@ -1,15 +1,15 @@
-file 1407 1563214956                                            
+file 17094 1563226178                                           
 version 2
-run General-0-20190715-13:22:27-22444
+run General-0-20190715-16:10:53-19052
 attr configname General
-attr datetime 20190715-13:22:27
+attr datetime 20190715-16:10:53
 attr experiment General
 attr inifile omnetpp.ini
 attr iterationvars ""
 attr iterationvarsf ""
 attr measurement ""
 attr network networksim2
-attr processid 22444
+attr processid 19052
 attr repetition 0
 attr replication #0
 attr resultdir results
@@ -18,9 +18,8 @@ attr seedset 0
 param **.numApps 1
 param **.queue.frameCapacity 10
 param **.queue.queueName "\"DropTailQueue\""
-param *.SN*.app[*].typename "\"TcpBasicClientApp\""
-param *.DF*.app[*].typename "\"TcpGenericServerApp\""
-param *.M.app[*].typename "\"MasterNode\""
+param *.SN1.app[*].typename "\"TcpBasicClientApp\""
+param *.DF1.app[*].typename "\"TcpGenericServerApp\""
 param *.SN1.app[*].connectAddress "\"DF1\""
 param **.switch false
 param **.app[*].thinkTime 0.2s
@@ -40,8 +39,149 @@ vector 3 networksim2.DF1.ppp[0].ppp transmissionState:vector ETV
 attr interpolationmode sample-hold
 attr source transmissionStateChanged
 attr title "tx state, vector"
-0	1369 9 0 0 0 0 1 0 0 0 0
-1	1378 9 0 0 0 0 1 0 0 0 0
-2	1387 9 0 0 0 0 1 0 0 0 0
-3	1396 9 0 0 0 0 1 0 0 0 0
+vector 4 networksim2.SN1.app[0] numActiveSessions:vector ETV
+attr interpolationmode sample-hold
+attr source sum(connect)
+attr title "number of active sessions, vector"
+vector 5 networksim2.SN1.tcp tcpRcvQueueBytes ETV
+vector 6 networksim2.SN1.tcp "advertised window" ETV
+vector 7 networksim2.SN1.tcp "receive window" ETV
+vector 8 networksim2.SN1.tcp "sent ack" ETV
+vector 9 networksim2.SN1.ppp[0].queue packetReceived:vector(packetBytes) ETV
+attr interpolationmode none
+attr title "received packets, vector(packetBytes)"
+vector 10 networksim2.SN1.ppp[0].queue queueingTime:vector ETV
+attr interpolationmode none
+attr title "queueing time, vector"
+vector 11 networksim2.SN1.ppp[0].ppp rcvdPkFromHl:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceivedFromUpper
+attr title "packets received from higher layer, vector(packetBytes)"
+vector 12 networksim2.SN1.ppp[0].ppp txPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToLower
+attr title "packets transmitted, vector(packetBytes)"
+vector 13 networksim2.DF1.ppp[0].ppp rxPkOk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rxPkOk
+attr title "packets received OK, vector(packetBytes)"
+vector 14 networksim2.DF1.ppp[0].ppp passedUpPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToUpper
+attr title "packets passed to higher layer, vector(packetBytes)"
+vector 15 networksim2.DF1.tcp "rcvd seq" ETV
+vector 16 networksim2.DF1.tcp "rcvd ack" ETV
+vector 17 networksim2.DF1.tcp "advertised window" ETV
+vector 18 networksim2.DF1.tcp "send window" ETV
+vector 19 networksim2.DF1.tcp tcpRcvQueueBytes ETV
+vector 20 networksim2.DF1.tcp "receive window" ETV
+vector 21 networksim2.DF1.tcp "sent ack" ETV
+vector 22 networksim2.DF1.ppp[0].queue packetReceived:vector(packetBytes) ETV
+attr interpolationmode none
+attr title "received packets, vector(packetBytes)"
+vector 23 networksim2.DF1.ppp[0].queue queueingTime:vector ETV
+attr interpolationmode none
+attr title "queueing time, vector"
+vector 24 networksim2.DF1.ppp[0].ppp rcvdPkFromHl:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceivedFromUpper
+attr title "packets received from higher layer, vector(packetBytes)"
+vector 25 networksim2.DF1.ppp[0].ppp txPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToLower
+attr title "packets transmitted, vector(packetBytes)"
+vector 26 networksim2.SN1.ppp[0].ppp rxPkOk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rxPkOk
+attr title "packets received OK, vector(packetBytes)"
+vector 27 networksim2.SN1.ppp[0].ppp passedUpPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToUpper
+attr title "packets passed to higher layer, vector(packetBytes)"
+vector 28 networksim2.SN1.tcp "rcvd seq" ETV
+vector 29 networksim2.SN1.tcp "rcvd ack" ETV
+vector 30 networksim2.SN1.tcp "send window" ETV
+vector 31 networksim2.SN1.app[0] packetSent:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSent
+attr title "packets sent, vector(packetBytes)"
+vector 32 networksim2.SN1.tcp "sent seq" ETV
+vector 33 networksim2.SN1.tcp "unacked bytes" ETV
+vector 34 networksim2.DF1.tcp "unacked bytes" ETV
+vector 35 networksim2.DF1.tcp "rcvd dupAcks" ETV
+vector 36 networksim2.DF1.app[0] packetReceived:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceived
+attr title "packets received, vector(packetBytes)"
+vector 37 networksim2.DF1.app[0] packetSent:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSent
+attr title "packets sent, vector(packetBytes)"
+vector 38 networksim2.DF1.tcp "sent seq" ETV
+vector 39 networksim2.SN1.tcp "measured RTT" ETV
+vector 40 networksim2.SN1.tcp "smoothed RTT" ETV
+vector 41 networksim2.SN1.tcp RTTVAR ETV
+vector 42 networksim2.SN1.tcp RTO ETV
+vector 43 networksim2.SN1.tcp cwnd ETV
+vector 44 networksim2.SN1.tcp "rcvd dupAcks" ETV
+vector 45 networksim2.SN1.app[0] packetReceived:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceived
+attr title "packets received, vector(packetBytes)"
+vector 46 networksim2.DF1.tcp "measured RTT" ETV
+vector 47 networksim2.DF1.tcp "smoothed RTT" ETV
+vector 48 networksim2.DF1.tcp RTTVAR ETV
+vector 49 networksim2.DF1.tcp RTO ETV
+vector 50 networksim2.DF1.tcp cwnd ETV
+0	5732 73 0 60 0 1.16584 5 0 1 2 2
+1	5805 428 0 211 0 1.58648 27 0 1 13 13
+2	6233 506 0 219 0 1.60936 31 0 9 125 711
+3	6739 453 0 220 0 1.60936 28 0 1 14 14
+4	7192 25 2 53 1 1.16208 2 0 1 1 1
+5	7217 357 3 206 1 1.58272 22 0 0 0 0
+6	7574 291 3 206 1 1.58272 14 7504 268348 3457972 915917053648
+7	7865 246 3 206 1 1.58272 13 7504 7504 97552 732030208
+8	8111 267 3 206 1 1.58272 13 0 260844 3096896 799261909696
+9	8378 221 5 209 1 1.58272 13 40 240 724 77136
+10	8599 232 5 209 1 1.58272 13 0 0.00376 0.00752 2.82752e-005
+11	8831 234 6 210 1 1.58272 13 40 240 724 77136
+12	9065 234 6 210 1 1.58272 13 47 247 815 87909
+13	9299 239 8 212 1.02408 1.60648 13 47 247 815 87909
+14	9538 239 8 212 1.02408 1.60648 13 40 240 724 77136
+15	9777 291 10 214 1.02408 1.60648 13 250000 250202 3252020 813510407236
+16	10068 286 10 214 1.02408 1.60648 13 0 260844 3096896 799261909696
+17	10354 517 10 214 1.02408 1.60648 23 257505 257706 5926832 1527275619562
+18	10871 245 10 214 1.02408 1.60648 12 7504 7504 90048 675720192
+19	11116 402 10 214 1.02408 1.60648 23 0 0 0 0
+20	11518 451 10 214 1.02408 1.60648 22 7504 7504 165088 1238820352
+21	11969 495 10 214 1.02408 1.60648 22 250001 250202 5504239 1377120355273
+22	12464 426 12 218 1.02408 1.60648 22 40 576 11068 6308880
+23	12890 308 12 219 1.02408 1.60936 14 0 0.18944 0.92424 0.1118268096
+24	13198 269 13 220 1.02408 1.60936 14 40 576 6460 3654672
+25	13467 269 13 220 1.02408 1.60936 14 47 583 6558 3745798
+26	13736 231 15 204 1.04816 1.58272 12 47 583 5392 3066020
+27	13967 231 15 204 1.04816 1.58272 12 40 576 5308 2991120
+28	14198 271 17 206 1.04816 1.58272 12 256019 260308 3093143 797319250969
+29	14469 271 17 206 1.04816 1.58272 12 250001 250202 3002219 751109947233
+30	14740 61 17 109 1.04816 1.30288 3 7504 7504 22512 168930048
+31	14801 19 19 19 1.04816 1.04816 1 200 200 200 40000
+32	14820 22 21 21 1.04816 1.04816 1 250001 250001 250001 62500500001
+33	14842 71 21 109 1.04816 1.30288 4 0 200 201 40001
+34	14913 404 30 214 1.07192 1.60648 20 0 5360 48776 169217344
+35	15317 192 36 214 1.09168 1.60648 11 0 1 1 1
+36	15509 19 37 37 1.09168 1.09168 1 200 200 200 40000
+37	15528 23 37 37 1.09168 1.09168 1 1048576 1048576 1048576 1099511627776
+38	15551 430 39 214 1.09168 1.60648 19 256020 265668 4956036 1292916013104
+39	15981 23 48 48 1.11544 1.11544 1 0.06728 0.06728 0.06728 0.0045265984
+40	16004 23 48 48 1.11544 1.11544 1 0.00841 0.00841 0.00841 7.07281e-005
+41	16027 23 48 48 1.11544 1.11544 1 0.66466 0.66466 0.66466 0.4417729156
+42	16050 23 48 48 1.11544 1.11544 1 2.66705 2.66705 2.66705 7.1131557025
+43	16073 41 48 109 1.11544 1.30288 2 1072 1608 2680 3734848
+44	16114 194 48 206 1.11544 1.58272 11 0 0 0 0
+45	16308 177 53 207 1.16208 1.58272 9 536 536 4824 2585664
+46	16485 93 65 197 1.18584 1.55984 4 0.0904 0.18656 0.46816 0.0612596608
+47	16578 110 65 197 1.18584 1.55984 4 0.01177 0.050470292969 0.114867949219 0.0041150823970105
+48	16688 108 65 197 1.18584 1.55984 4 0.482739121094 0.66802 2.274588496094 1.3128876239834
+49	16796 110 65 197 1.18584 1.55984 4 1.981426777345 2.68385 9.213221933595 21.502261054796
+50	16906 186 65 214 1.18584 1.60648 9 1072 5360 28944 110321664
 

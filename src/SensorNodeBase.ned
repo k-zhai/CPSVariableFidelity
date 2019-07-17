@@ -13,14 +13,14 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package research.simulations;
+package research;
 
 import inet.applications.contract.IApp;
 
 simple SensorNodeBase like IApp
 {
     parameters:
-    	@class(inet::SensorNodeBase);
+    	@class(SensorNodeBase);
         string localAddress = default("");
         int localPort = default(-1);
         string connectAddress = default("");
