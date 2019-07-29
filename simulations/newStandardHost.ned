@@ -13,11 +13,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package research;
+package research.simulations;
 
-import inet.applications.contract.IApp;
+import inet.node.base.ApplicationLayerNodeBase;
 
-simple DFNode extends SensorNodeBase
+module newStandardHost extends ApplicationLayerNodeBase
 {
-    @class(DFNode);
+    parameters:
+        @display("i=device/pc2");
+        @figure[submodules];
+        forwarding = default(false);  // disable routing by default
+        ipv4.arp.proxyArpInterfaces = default(""); // proxy arp is disabled on hosts by default
+        *.routingTableModule = default("^.ipv4.routingTable");   
 }

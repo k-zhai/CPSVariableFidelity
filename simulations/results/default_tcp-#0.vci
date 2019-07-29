@@ -1,0 +1,98 @@
+                                                                
+version 2
+run default_tcp-0-20190726-17:05:56-38284
+attr configname default_tcp
+attr datetime 20190726-17:05:56
+attr experiment default_tcp
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvarsf ""
+attr measurement ""
+attr network networksim2
+attr processid 38284
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+param **.numApps 1
+param **.queue.frameCapacity 20
+param **.queue.queueName "\"DropTailQueue\""
+param *.SN*.app[*].typename "\"SensorNode\""
+param *.DF*.app[*].typename "\"DFNode\""
+param *.SN1.app[*].connectAddress "\"DF1\""
+param *.SN2.app[*].connectAddress "\"DF1\""
+param *.SN3.app[*].connectAddress "\"DF2\""
+param *.SN4.app[*].connectAddress "\"DF2\""
+param **.switch false
+param **.app[*].thinkTime 0.2s
+param **.app[*].idleInterval 0.1s
+param *.configurator.config "xml(\"<config><interface hosts='*' address='192.168.1.x' netmask='255.255.255.0'/></config>\")"
+
+vector 0 networksim2.SN1.ppp[0].queue queueLength:vector ETV
+attr interpolationmode sample-hold
+attr title "queue length, vector"
+vector 1 networksim2.SN1.ppp[0].ppp transmissionState:vector ETV
+attr interpolationmode sample-hold
+attr source transmissionStateChanged
+attr title "tx state, vector"
+vector 2 networksim2.DF1.ppp[0].queue queueLength:vector ETV
+attr interpolationmode sample-hold
+attr title "queue length, vector"
+vector 3 networksim2.DF1.ppp[0].ppp transmissionState:vector ETV
+attr interpolationmode sample-hold
+attr source transmissionStateChanged
+attr title "tx state, vector"
+vector 4 networksim2.SN1.tcp tcpRcvQueueBytes ETV
+vector 5 networksim2.SN1.tcp "advertised window" ETV
+vector 6 networksim2.SN1.tcp "receive window" ETV
+vector 7 networksim2.SN1.tcp "sent ack" ETV
+vector 8 networksim2.SN1.ppp[0].queue packetReceived:vector(packetBytes) ETV
+attr interpolationmode none
+attr title "received packets, vector(packetBytes)"
+vector 9 networksim2.SN1.ppp[0].queue queueingTime:vector ETV
+attr interpolationmode none
+attr title "queueing time, vector"
+vector 10 networksim2.SN1.ppp[0].ppp rcvdPkFromHl:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceivedFromUpper
+attr title "packets received from higher layer, vector(packetBytes)"
+vector 11 networksim2.SN1.ppp[0].ppp txPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToLower
+attr title "packets transmitted, vector(packetBytes)"
+vector 12 networksim2.DF1.ppp[0].ppp rxPkOk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rxPkOk
+attr title "packets received OK, vector(packetBytes)"
+vector 13 networksim2.DF1.ppp[0].ppp passedUpPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToUpper
+attr title "packets passed to higher layer, vector(packetBytes)"
+vector 14 networksim2.DF1.tcp "rcvd seq" ETV
+vector 15 networksim2.DF1.tcp "rcvd ack" ETV
+vector 16 networksim2.DF1.tcp "advertised window" ETV
+vector 17 networksim2.DF1.tcp "send window" ETV
+vector 18 networksim2.DF1.tcp tcpRcvQueueBytes ETV
+vector 19 networksim2.DF1.tcp "receive window" ETV
+vector 20 networksim2.DF1.tcp "sent ack" ETV
+vector 21 networksim2.DF1.ppp[0].queue packetReceived:vector(packetBytes) ETV
+attr interpolationmode none
+attr title "received packets, vector(packetBytes)"
+vector 22 networksim2.DF1.ppp[0].queue queueingTime:vector ETV
+attr interpolationmode none
+attr title "queueing time, vector"
+vector 23 networksim2.DF1.ppp[0].ppp rcvdPkFromHl:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceivedFromUpper
+attr title "packets received from higher layer, vector(packetBytes)"
+vector 24 networksim2.DF1.ppp[0].ppp txPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToLower
+attr title "packets transmitted, vector(packetBytes)"
+vector 25 networksim2.SN1.ppp[0].ppp rxPkOk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rxPkOk
+attr title "packets received OK, vector(packetBytes)"
+vector 26 networksim2.SN1.ppp[0].ppp passedUpPk:vector(packetBytes) ETV
+attr interpolationmode

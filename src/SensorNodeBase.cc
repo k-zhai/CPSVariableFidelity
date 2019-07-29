@@ -41,8 +41,8 @@ namespace inet {
 Define_Module(SensorNodeBase);
 
 bool SensorNodeBase::switch_fidelity = false;
-const simtime_t SensorNodeBase::start_time = 10;
-const simtime_t SensorNodeBase::end_time = 30;
+const const_simtime_t SensorNodeBase::start_time = 10;
+const const_simtime_t SensorNodeBase::end_time = 30;
 
 SensorNodeBase::SensorNodeBase() {}
 
@@ -72,8 +72,12 @@ void SensorNodeBase::initialize(int stage) {
         stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
-        timeoutMsg = new cMessage("timer"); // msg name
+        timeoutMsg = new cMessage("timer");
     } else if (stage == INITSTAGE_APPLICATION_LAYER) {
+        const char *localAddress = par("localAddress");
+        int localPort = par("localPort");
+        socket.setOutputGate(gate("socketOut"));
+        socket.bind(localAddress[0] ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
         socket.listen();
 
         cModule *node = findContainingNode(this);
@@ -94,7 +98,7 @@ void SensorNodeBase::initialize(int stage) {
     scheduleAt(end_time, endMsg);
 
     cMessage* timeout = new cMessage(nullptr, TIMER);
-    scheduleAt(start_time + 0.1, timeout);
+    scheduleAt(start_time, timeout);
 }
 
 void SensorNodeBase::sendOrSchedule(cMessage *msg, simtime_t delay) {
@@ -162,17 +166,28 @@ void SensorNodeBase::handleMessage(cMessage *msg) {
                 // Schedule the message to be finally sent after the approx. propagation delay
                 delayedMsgSend(msg);
             } else {
-                finalMsgSend(msg, "DF1"); //should not be hard coded string
+                const char *fullname = getParentModule()->getFullName();
+                if (strcmp(fullname, "SN1") == 0 || strcmp(fullname, "SN2") == 0) {
+                    finalMsgSend(msg, "DF1");
+                } else if (strcmp(fullname, "SN3") == 0 || strcmp(fullname, "SN4") == 0) {
+                    finalMsgSend(msg, "DF2");
+                } else {
+                    finalMsgSend(msg, msg->getSenderModule()->getName());
+                }
             }
         }
     } else if (msg->isSelfMessage()) {
-        sendBack(msg);
+        if (msg->getKind() == MSGKIND_CONNECT || msg->getKind() == MSGKIND_SEND) {
+            OperationalBase::handleMessage(msg);
+        } else {
+            sendBack(msg);
+        }
     } else if (msg->getKind() == TCP_I_PEER_CLOSED) {
         // we'll close too, but only after there's surely no message
         // pending to be sent back in this connection
         int connId = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
         delete msg;
-        auto request = new Request("close", TCP_C_CLOSE);
+        auto request = new Message("close", TCP_C_CLOSE);
         request->addTagIfAbsent<SocketReq>()->setSocketId(connId);
         sendOrSchedule(request, delay + maxMsgDelay);
     } else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {
@@ -212,7 +227,7 @@ void SensorNodeBase::handleMessage(cMessage *msg) {
         delete msg;
 
         if (doClose) {
-            auto request = new Request("close", TCP_C_CLOSE);
+            auto request = new Message("close", TCP_C_CLOSE);
             TcpCommand *cmd = new TcpCommand();
             request->addTagIfAbsent<SocketReq>()->setSocketId(connId);
             request->setControlInfo(cmd);
@@ -395,11 +410,11 @@ void SensorNodeBase::delayedMsgSend(cMessage* msg) {
     }
 }
 
-void SensorNodeBase::finalMsgSend(cMessage* msg, const char* module) {
+void SensorNodeBase::finalMsgSend(cMessage* msg, const char* mod) {
     if (msg->isSelfMessage() && msg->getKind() == APP_SELF_MSG) {
         delete msg;
         msg = new cMessage(nullptr, APP_MSG_SENT);
-        cModule *targetModule = getParentModule()->getSubmodule(module);
+        cModule *targetModule = getParentModule()->getParentModule()->getSubmodule(mod);
         sendDirect(msg, targetModule, "appIn");
     } else {
         error("Must be a self message with kind APP_SELF_MSG");
@@ -413,7 +428,7 @@ void SensorNodeBase::saveData(cMessage* msg) {
 void SensorNodeBase::msgReturn(cMessage* msg) {
     if (msg->isSelfMessage()) {
         msg->setKind(APP_MSG_RETURNED);
-        sendDirect(msg, msg->getSenderModule(), "appIn");
+        sendDirect(msg, msg->getSenderModule(), "appIn"); // getParentModule()->getParentModule()->getSubmodule(mod)
     } else {
         emit(packetReceivedSignal, msg);
         saveData(msg);

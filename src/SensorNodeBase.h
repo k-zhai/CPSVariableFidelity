@@ -60,8 +60,8 @@ class SensorNodeBase : public TcpAppBase, public LifecycleUnsupported {
 
         // temporary, until ExperimentControl is fixed
         static bool switch_fidelity;
-        const static simtime_t start_time;
-        const static simtime_t end_time;
+        const static const_simtime_t start_time;
+        const static const_simtime_t end_time;
 
 
     public:
@@ -94,11 +94,11 @@ class SensorNodeBase : public TcpAppBase, public LifecycleUnsupported {
         virtual void handleStopOperation(LifecycleOperation *operation) override;
         virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
-        void saveData(cMessage* msg);
+        virtual void saveData(cMessage* msg);
 
-        void delayedMsgSend(cMessage* msg);
-        void finalMsgSend(cMessage* msg, const char* module);
-        void msgReturn(cMessage* msg);
+        virtual void delayedMsgSend(cMessage* msg);
+        virtual void finalMsgSend(cMessage* msg, const char* mod);
+        virtual void msgReturn(cMessage* msg);
 
         void close() override;
 };
