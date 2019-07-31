@@ -30,6 +30,7 @@ void ExperimentControl::handleMessage(cMessage* msg) {
     } else if (msg->getKind() == END_MSG && msg->isSelfMessage()) {
         this->state = false;
     }
+    delete msg;
 }
 
 ExperimentControl* ExperimentControl::getInstance() {

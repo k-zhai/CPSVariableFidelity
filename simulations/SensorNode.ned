@@ -26,8 +26,8 @@ simple SensorNode like IApp
         string connectAddress = default("");  // server address (may be symbolic)
         int connectPort = default(1000); // port number to connect to
         double startTime @unit(s) = default(1s); // time first session begins
-        double stopTime @unit(s) = default(-1s);  // time of finishing sending, negative values mean forever
-        volatile int numRequestsPerSession = default(1);  // number of requests sent per session
+        double stopTime @unit(s) = default(100s);  // time of finishing sending, negative values mean forever
+        volatile int numRequestsPerSession = default(10);  // number of requests sent per session
         volatile int requestLength @unit(B) = default(200B); // length of a request
         volatile int replyLength @unit(B) = default(1MiB); // length of a reply
         volatile double thinkTime @unit(s); // time gap between requests

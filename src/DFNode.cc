@@ -14,6 +14,7 @@
 // 
 
 #include "DFNode.h"
+#include "ExperimentControl.h"
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/applications/tcpapp/GenericAppMsg_m.h"
@@ -34,8 +35,8 @@ namespace inet {
 Define_Module(DFNode);
 
 bool DFNode::switch_fidelity = false;
-const_simtime_t DFNode::start_time = 5;
-const_simtime_t DFNode::end_time = 10;
+const_simtime_t DFNode::start_time = 50;
+const_simtime_t DFNode::end_time = 75;
 
 void DFNode::initialize(int stage)
 {
@@ -65,23 +66,20 @@ void DFNode::initialize(int stage)
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
+
+        cMessage* startMsg = new cMessage("start_msg", START_MSG);
+        cMessage* endMsg = new cMessage("end_msg", END_MSG);
+        scheduleAt(start_time, startMsg);
+        scheduleAt(end_time, endMsg);
+
+        cMessage* timeout = new cMessage(nullptr, TIMER);
+        scheduleAt(start_time, timeout);
     }
-
-    cMessage* startMsg = new cMessage("start_msg", START_MSG);
-    cMessage* endMsg = new cMessage("end_msg", END_MSG);
-    scheduleAt(start_time, startMsg);
-    scheduleAt(end_time, endMsg);
-
-    cMessage* timeout = new cMessage(nullptr, TIMER);
-    scheduleAt(start_time, timeout);
 }
 
 void DFNode::sendOrSchedule(cMessage *msg, simtime_t delay)
 {
     if (delay == 0) {
-        cModule *current = getParentModule(); // TEST
-        const char* name = getParentModule()->getFullName(); // TEST
-        std::vector<const char *> gates = getGateNames(); // TEST
         sendBack(msg);
     } else {
         scheduleAt(simTime() + delay, msg);
@@ -114,10 +112,14 @@ void DFNode::handleMessage(cMessage *msg)
     if (msg->getKind() == START_MSG && msg->isSelfMessage()) {
         switch_fidelity = true;
         delete msg;
+        msg = new cMessage(nullptr, STOP_TCP);
+        sendDirect(msg, getModuleByPath("networksim2.SN1.app[0]"), "appIn");
         return;
     } else if (msg->getKind() == END_MSG && msg->isSelfMessage()) {
         switch_fidelity = false;
         delete msg;
+        msg = new cMessage(nullptr, RESTART_TCP);
+        sendDirect(msg, getModuleByPath("networksim2.SN1.app[0]"), "appIn");
         return;
     }
 
@@ -131,23 +133,23 @@ void DFNode::handleMessage(cMessage *msg)
             // Schedule message to be finally sent after propagation delay
             EV_INFO << "delayedMsgSend " << simTime();
             delayedMsgSend(msg);
-            return;
         } else if (msg->getKind() == APP_SELF_MSG) {
             EV_INFO << "finalMsgSend " << simTime();
-            cModule *parent = getParentModule(); // TEST
-            const char* parentname = getParentModule()->getFullName(); // TEST
-            std::vector<const char *> gates = getGateNames(); // TEST
-            cModule *current = this; // TEST
-            const char* currentname = this->getFullName(); // TEST
             finalMsgSend(msg, "SN1");
-            return;
         } else if (msg->getKind() == APP_MSG_RETURNED) {
             saveData(msg);
+        } else {
+            delete msg;
         }
+        return;
     }
 
     if (msg->isSelfMessage()) {
-        sendBack(msg);
+        if (msg->getKind() == TIMER) {
+            delete msg;
+        } else {
+            sendBack(msg);
+        }
     }
     else if (msg->getKind() == TCP_I_PEER_CLOSED) {
         // we'll close too, but only after there's surely no message
@@ -243,12 +245,9 @@ void DFNode::finalMsgSend(cMessage* msg, const char* mod) {
     if (msg->isSelfMessage() && msg->getKind() == APP_SELF_MSG) {
         delete msg;
         msg = new cMessage(nullptr, APP_MSG_SENT);
-        cModule *parent = getParentModule();
-        cModule *parentparent = parent->getParentModule();
-        cModule *parentparentchild = parentparent->getSubmodule(mod);
-        cModule *parentparentchild2 = parentparent->getSubmodule("SN1");
-        cModule *targetModule = getParentModule()->getParentModule()->getSubmodule("SN1")->getSubmodule("at");
-        std::vector<const char *> targetgates = targetModule->getGateNames();
+        std::string s(mod);
+        std::string targetPath("networksim2." + s + ".app[0]");
+        cModule *targetModule = getModuleByPath(targetPath.c_str());
         sendDirect(msg, targetModule, "appIn");
     } else {
         error("Must be a self message with kind APP_SELF_MSG");

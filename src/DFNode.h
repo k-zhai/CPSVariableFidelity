@@ -29,7 +29,9 @@ enum msgKind {
     APP_SELF_MSG = 11,
     APP_MSG_SENT = 12,
     APP_MSG_RETURNED = 13,
-    TIMER = 14
+    TIMER = 14,
+    RESTART_TCP = 15,
+    STOP_TCP = 16
 };
 
 class DFNode : public cSimpleModule, public LifecycleUnsupported {

@@ -156,9 +156,10 @@ void SensorNode::rescheduleOrDeleteTimer(simtime_t d, short int msgKind)
 
 void SensorNode::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
+
     TcpAppBase::socketDataArrived(socket, msg, urgent);
 
-    if (numRequestsToSend > 0) {
+    if (numRequestsToSend > 0 && !switchActive) {
         EV_INFO << "reply arrived\n";
 
         if (timeoutMsg) {
@@ -183,7 +184,7 @@ void SensorNode::socketClosed(TcpSocket *socket)
     TcpAppBase::socketClosed(socket);
 
     // start another session after a delay
-    if (timeoutMsg) {
+    if (timeoutMsg && !switchActive) {
         simtime_t d = simTime() + par("idleInterval");
         rescheduleOrDeleteTimer(d, MSGKIND_CONNECT);
     }
@@ -207,8 +208,18 @@ void SensorNode::handleMessage(cMessage *msg) {
         scheduleAt(simTime() + propagationDelay, msg);
     } else if (msg->getKind() == APP_SELF_MSG) {
         msg->setKind(APP_MSG_RETURNED);
-        cModule *targetModule = getParentModule()->getParentModule()->getSubmodule("DF1")->getSubmodule("app[0]");
+        cModule *targetModule = getModuleByPath("networksim2.DF1.app[0]");
         sendDirect(msg, targetModule, "appIn");
+    } else if (msg->getKind() == STOP_TCP) {
+        switchActive = true;
+        socket.destroy();
+        cancelEvent(timeoutMsg);
+        delete msg;
+    } else if (msg->getKind() == RESTART_TCP) {
+        switchActive = false;
+        timeoutMsg->setKind(MSGKIND_CONNECT);
+        scheduleAt(simTime(), timeoutMsg);
+        delete msg;
     } else {
         OperationalBase::handleMessage(msg);
     }
