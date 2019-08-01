@@ -16,28 +16,43 @@
 #ifndef EXPERIMENTCONTROL_H_
 #define EXPERIMENTCONTROL_H_
 
+#include <vector>
+#include <string>
 #include <omnetpp.h>
 
 using namespace omnetpp;
+using std::string;
+using std::vector;
 
-enum msgKind {
-    START_MSG = 0,
-    END_MSG = 1
+namespace inet {
+
+enum msg_kind : short int {
+    APP_SELF_MSG = 11,
+    APP_MSG_SENT = 12,
+    APP_MSG_RETURNED = 13,
+    TIMER = 14,
+    RESTART_TCP = 15,
+    STOP_TCP = 16,
+    START_MSG = 20,
+    END_MSG = 21
 };
 
 class ExperimentControl : public cSimpleModule {
 
     private:
         static ExperimentControl* instance;
-        bool state = par("switch");
+        vector<string> sources = {"DF1"};
+        vector<string> targets = {"SN1"};
+        int state = 1;
+        bool switchActive = par("switch");
 
     protected:
-        int currentLayer;
-        int newLayer;
-        simtime_t startTime;
-        simtime_t endTime;
+        const int currentLayer = 7;
+        const int newLayer = 1;
+        const_simtime_t start_time = 50;
+        const_simtime_t end_time = 75;
 
-        virtual void initialize() override;
+        virtual void initialize(int stage) override;
         virtual void handleMessage(cMessage* msg) override;
 
     public:
@@ -45,8 +60,15 @@ class ExperimentControl : public cSimpleModule {
         ~ExperimentControl() = default;
         static ExperimentControl* getInstance();
 
-        bool getState();
+        int getState();
+        bool getSwitchStatus();
         void setState();
+
+        void sendToSources(cMessage *msg);
+        void sendToTargets(cMessage *msg);
+
 };
+
+}
 
 #endif /* EXPERIMENTCONTROL_H_ */

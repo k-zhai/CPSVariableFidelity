@@ -25,14 +25,14 @@
 
 namespace inet {
 
-enum msgKind {
-    APP_SELF_MSG = 11,
-    APP_MSG_SENT = 12,
-    APP_MSG_RETURNED = 13,
-    TIMER = 14,
-    RESTART_TCP = 15,
-    STOP_TCP = 16
-};
+//enum msgKind {
+//    APP_SELF_MSG = 11,
+//    APP_MSG_SENT = 12,
+//    APP_MSG_RETURNED = 13,
+//    TIMER = 14,
+//    RESTART_TCP = 15,
+//    STOP_TCP = 16
+//};
 
 class DFNode : public cSimpleModule, public LifecycleUnsupported {
 
@@ -70,8 +70,8 @@ class DFNode : public cSimpleModule, public LifecycleUnsupported {
 
         void saveData(cMessage* msg);
 
-        virtual void delayedMsgSend(cMessage* msg);
-        virtual void finalMsgSend(cMessage* msg, const char* mod);
+        virtual void delayedMsgSend(cMessage* msg, int layer);
+        virtual void finalMsgSend(cMessage* msg, const char* mod, int layer);
 };
 
 }

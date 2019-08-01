@@ -16,6 +16,7 @@
 #ifndef SENSORNODE_H_
 #define SENSORNODE_H_
 
+#include "ExperimentControl.h"
 #include "inet/common/INETDefs.h"
 
 #include "inet/applications/tcpapp/TcpAppBase.h"
@@ -23,14 +24,6 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
-
-enum msgKind {
-    APP_SELF_MSG = 11,
-    APP_MSG_SENT = 12,
-    APP_MSG_RETURNED = 13,
-    RESTART_TCP = 15,
-    STOP_TCP = 16
-};
 
 class SensorNode : public TcpAppBase {
 

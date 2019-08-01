@@ -16,13 +16,13 @@
 #ifndef MASTERNODE_H_
 #define MASTERNODE_H_
 
-#include "SensorNodeBase.h"
+#include "DFNode.h"
 #include <vector>
 #include <string>
 
 namespace inet {
 
-class MasterNode: public SensorNodeBase {
+class MasterNode: public DFNode {
 
     protected:
         std::vector<std::string> data;
