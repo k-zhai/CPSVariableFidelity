@@ -30,9 +30,10 @@ enum msg_kind : short int {
     APP_SELF_MSG = 11,
     APP_MSG_SENT = 12,
     APP_MSG_RETURNED = 13,
-    TIMER = 14,
-    RESTART_TCP = 15,
-    STOP_TCP = 16,
+    INIT_TIMER = 14,
+    TIMER = 15,
+    RESTART_TCP = 16,
+    STOP_TCP = 17,
     START_MSG = 20,
     END_MSG = 21
 };
@@ -43,8 +44,8 @@ class ExperimentControl : public cSimpleModule {
         static ExperimentControl* instance;
         vector<string> sources = {"DF1"};
         vector<string> targets = {"SN1"};
-        int state = 1;
-        bool switchActive = par("switch");
+        short int state = 1;
+        bool switchActive = false;
 
     protected:
         const int currentLayer = 7;
@@ -52,16 +53,19 @@ class ExperimentControl : public cSimpleModule {
         const_simtime_t start_time = 50;
         const_simtime_t end_time = 75;
 
-        virtual void initialize(int stage) override;
+        virtual void initialize() override;
         virtual void handleMessage(cMessage* msg) override;
 
     public:
         ExperimentControl() = default;
         ~ExperimentControl() = default;
-        static ExperimentControl* getInstance();
+        static ExperimentControl& getInstance() {
+            static ExperimentControl instance;
+            return instance;
+        }
 
-        int getState();
-        bool getSwitchStatus();
+        int getState() const ;
+        bool getSwitchStatus() const;
         void setState();
 
         void sendToSources(cMessage *msg);

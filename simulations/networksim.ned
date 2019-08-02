@@ -103,6 +103,10 @@ network networksim2
         //            parameters:
         //                @display("i=device/pc;p=287.94998,421.9575");
         //        }
+        EC: ExperimentControl {
+            parameters:
+                @display("i=device/pc;p=112.965,421.9575");
+        }
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=402,100");

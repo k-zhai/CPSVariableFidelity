@@ -14,7 +14,6 @@
 // 
 
 #include "DFNode.h"
-#include "ExperimentControl.h"
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/applications/tcpapp/GenericAppMsg_m.h"
@@ -30,8 +29,6 @@
 namespace inet {
 
 Define_Module(DFNode);
-
-ExperimentControl* ExperimentControl::instance = nullptr;
 
 void DFNode::initialize(int stage)
 {
@@ -61,8 +58,6 @@ void DFNode::initialize(int stage)
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
-
-        ExperimentControl::getInstance()->setState();
     }
 }
 
@@ -112,18 +107,18 @@ void DFNode::handleMessage(cMessage *msg)
 //        return;
 //    }
 
-    if (ExperimentControl::getInstance()->getSwitchStatus()) {
-        if (msg->getKind() == msg_kind::TIMER) {
+    if (ExperimentControl::getInstance().getSwitchStatus()) {
+        if (msg->getKind() == msg_kind::TIMER || msg->getKind() == msg_kind::INIT_TIMER) {
             // Schedule next TIMER call
             cMessage* tmMsg = new cMessage(nullptr, msg_kind::TIMER);
             scheduleAt(simTime() + frequency, tmMsg);
 
             // Schedule message to be finally sent after propagation delay
             EV_INFO << "delayedMsgSend " << simTime();
-            delayedMsgSend(msg, ExperimentControl::getInstance()->getState());
+            delayedMsgSend(msg, ExperimentControl::getInstance().getState());
         } else if (msg->getKind() == msg_kind::APP_SELF_MSG) {
             EV_INFO << "finalMsgSend " << simTime();
-            finalMsgSend(msg, "SN1", ExperimentControl::getInstance()->getState());
+            finalMsgSend(msg, "SN1", ExperimentControl::getInstance().getState());
         } else if (msg->getKind() == msg_kind::APP_MSG_RETURNED) {
             saveData(msg);
         } else {
@@ -222,12 +217,12 @@ void DFNode::saveData(cMessage* msg) {
 void DFNode::delayedMsgSend(cMessage* msg, int layer) {
     switch (layer) {
         case 1:
-            if (msg->isSelfMessage() && msg->getKind() == msg_kind::TIMER) {
+            if ((msg->isSelfMessage() && msg->getKind() == msg_kind::TIMER) || msg->getKind() == msg_kind::INIT_TIMER) {
                 delete msg;
                 msg = new cMessage(nullptr, msg_kind::APP_SELF_MSG);
                 scheduleAt(simTime() + propagationDelay, msg);
             } else {
-                error("Must be a self message with kind TIMER");
+                error("Must be a self message with kind TIMER or message with kind INIT_TIMER");
             }
             break;
         default:

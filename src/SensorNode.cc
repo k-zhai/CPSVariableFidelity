@@ -202,20 +202,20 @@ void SensorNode::socketFailure(TcpSocket *socket, int code)
 }
 
 void SensorNode::handleMessage(cMessage *msg) {
-    if (msg->getKind() == APP_MSG_SENT) {
+    if (msg->getKind() == msg_kind::APP_MSG_SENT) {
         delete msg;
-        msg = new cMessage(nullptr, APP_SELF_MSG);
+        msg = new cMessage(nullptr, msg_kind::APP_SELF_MSG);
         scheduleAt(simTime() + propagationDelay, msg);
-    } else if (msg->getKind() == APP_SELF_MSG) {
+    } else if (msg->getKind() == msg_kind::APP_SELF_MSG) {
         msg->setKind(APP_MSG_RETURNED);
         cModule *targetModule = getModuleByPath("networksim2.DF1.app[0]");
         sendDirect(msg, targetModule, "appIn");
-    } else if (msg->getKind() == STOP_TCP) {
+    } else if (msg->getKind() == msg_kind::STOP_TCP) {
         switchActive = true;
         socket.destroy();
         cancelEvent(timeoutMsg);
         delete msg;
-    } else if (msg->getKind() == RESTART_TCP) {
+    } else if (msg->getKind() == msg_kind::RESTART_TCP) {
         switchActive = false;
         timeoutMsg->setKind(MSGKIND_CONNECT);
         scheduleAt(simTime(), timeoutMsg);

@@ -1,15 +1,15 @@
-                                                                
+file 914424 1564778420                                          
 version 2
-run default_tcp-0-20190801-15:06:37-15224
+run default_tcp-0-20190802-15:39:12-36428
 attr configname default_tcp
-attr datetime 20190801-15:06:37
+attr datetime 20190802-15:39:12
 attr experiment default_tcp
 attr inifile omnetpp.ini
 attr iterationvars ""
 attr iterationvarsf ""
 attr measurement ""
 attr network networksim2
-attr processid 15224
+attr processid 36428
 attr repetition 0
 attr replication #0
 attr resultdir results
@@ -43,3 +43,184 @@ vector 3 networksim2.DF1.ppp[0].ppp transmissionState:vector ETV
 attr interpolationmode sample-hold
 attr source transmissionStateChanged
 attr title "tx state, vector"
+vector 4 networksim2.SN1.tcp tcpRcvQueueBytes ETV
+vector 5 networksim2.SN1.tcp "advertised window" ETV
+vector 6 networksim2.SN1.tcp "receive window" ETV
+vector 7 networksim2.SN1.tcp "sent ack" ETV
+vector 8 networksim2.SN1.ppp[0].queue packetReceived:vector(packetBytes) ETV
+attr interpolationmode none
+attr title "received packets, vector(packetBytes)"
+vector 9 networksim2.SN1.ppp[0].queue queueingTime:vector ETV
+attr interpolationmode none
+attr title "queueing time, vector"
+vector 10 networksim2.SN1.ppp[0].ppp rcvdPkFromHl:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceivedFromUpper
+attr title "packets received from higher layer, vector(packetBytes)"
+vector 11 networksim2.SN1.ppp[0].ppp txPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToLower
+attr title "packets transmitted, vector(packetBytes)"
+vector 12 networksim2.DF1.ppp[0].ppp rxPkOk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rxPkOk
+attr title "packets received OK, vector(packetBytes)"
+vector 13 networksim2.DF1.ppp[0].ppp passedUpPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToUpper
+attr title "packets passed to higher layer, vector(packetBytes)"
+vector 14 networksim2.DF1.tcp "rcvd seq" ETV
+vector 15 networksim2.DF1.tcp "rcvd ack" ETV
+vector 16 networksim2.DF1.tcp "advertised window" ETV
+vector 17 networksim2.DF1.tcp "send window" ETV
+vector 18 networksim2.DF1.tcp tcpRcvQueueBytes ETV
+vector 19 networksim2.DF1.tcp "receive window" ETV
+vector 20 networksim2.DF1.tcp "sent ack" ETV
+vector 21 networksim2.DF1.ppp[0].queue packetReceived:vector(packetBytes) ETV
+attr interpolationmode none
+attr title "received packets, vector(packetBytes)"
+vector 22 networksim2.DF1.ppp[0].queue queueingTime:vector ETV
+attr interpolationmode none
+attr title "queueing time, vector"
+vector 23 networksim2.DF1.ppp[0].ppp rcvdPkFromHl:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceivedFromUpper
+attr title "packets received from higher layer, vector(packetBytes)"
+vector 24 networksim2.DF1.ppp[0].ppp txPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToLower
+attr title "packets transmitted, vector(packetBytes)"
+vector 25 networksim2.SN1.ppp[0].ppp rxPkOk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rxPkOk
+attr title "packets received OK, vector(packetBytes)"
+vector 26 networksim2.SN1.ppp[0].ppp passedUpPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToUpper
+attr title "packets passed to higher layer, vector(packetBytes)"
+vector 27 networksim2.SN1.tcp "rcvd seq" ETV
+vector 28 networksim2.SN1.tcp "rcvd ack" ETV
+vector 29 networksim2.SN1.tcp "send window" ETV
+vector 30 networksim2.SN1.tcp "sent seq" ETV
+vector 31 networksim2.SN1.tcp "unacked bytes" ETV
+vector 32 networksim2.DF1.tcp "unacked bytes" ETV
+vector 33 networksim2.DF1.tcp "rcvd dupAcks" ETV
+vector 34 networksim2.DF1.tcp "sent seq" ETV
+vector 35 networksim2.SN1.tcp "measured RTT" ETV
+vector 36 networksim2.SN1.tcp "smoothed RTT" ETV
+vector 37 networksim2.SN1.tcp RTTVAR ETV
+vector 38 networksim2.SN1.tcp RTO ETV
+vector 39 networksim2.SN1.tcp cwnd ETV
+vector 40 networksim2.SN1.tcp "rcvd dupAcks" ETV
+vector 41 networksim2.DF1.tcp "measured RTT" ETV
+vector 42 networksim2.DF1.tcp "smoothed RTT" ETV
+vector 43 networksim2.DF1.tcp RTTVAR ETV
+vector 44 networksim2.DF1.tcp RTO ETV
+vector 45 networksim2.DF1.tcp cwnd ETV
+39	5108 20 48 48 1.11544 1.11544 1 1072 1072 1072 1149184
+35	5128 23 48 48 1.11544 1.11544 1 0.06728 0.06728 0.06728 0.0045265984
+36	5151 23 48 48 1.11544 1.11544 1 0.00841 0.00841 0.00841 7.07281e-005
+37	5174 23 48 48 1.11544 1.11544 1 0.66466 0.66466 0.66466 0.4417729156
+38	5197 23 48 48 1.11544 1.11544 1 2.66705 2.66705 2.66705 7.1131557025
+29	5220 40 17 48 1.04816 1.11544 2 7504 7504 15008 112620032
+6	5260 22955 3 15769 1 49.99128 1050 7504 7504 7879200 59125516800
+5	28215 25074 3 15769 1 49.99128 1051 7504 824716 570772312 3.3797370653712e+014
+30	53289 22 21 21 1.04816 1.04816 1 250001 250001 250001 62500500001
+7	53311 25050 3 15769 1 49.99128 1050 0 817212 562629588 3.2940119126504e+014
+27	78361 26090 17 15769 1.04816 49.99128 1049 256019 816676 562068395 3.2879890154046e+014
+28	104451 26090 17 15769 1.04816 49.99128 1049 250001 250201 262460649 65667866840249
+31	130541 36 21 48 1.04816 1.11544 2 0 200 200 40000
+40	130577 20828 48 15769 1.11544 49.99128 1048 0 0 0 0
+4	151405 39569 3 15769 1 49.99128 2097 0 0 0 0
+45	190974 25847 60 15785 1.18584 50.01504 1047 1072 561728 294625800 1.1038588126381e+014
+41	216821 2009 60 15642 1.18584 49.59528 78 0.0904 0.65296 48.5036 31.3238061888
+42	218830 2540 60 15642 1.18584 49.59528 78 0.01177 0.652927135687 43.933110050218 27.028002019011
+43	221370 2534 60 15642 1.18584 49.59528 78 0.000369747021 0.66802 10.470828856345 3.938614123247
+44	223904 1905 60 15642 1.18584 49.59528 78 1 2.68385 99.545914709235 142.67745429716
+17	225809 23995 10 15785 1.02408 50.01504 1049 7504 7504 7871696 59069206784
+19	249804 24282 10 15785 1.02408 50.01504 1063 7504 7504 7976752 59857547008
+16	274086 26430 10 15785 1.02408 50.01504 1064 257505 257705 274197720 70662020430600
+34	300516 26364 39 15785 1.09168 50.01504 1061 256020 824180 573046100 3.3809746187336e+014
+20	326880 26408 10 15785 1.02408 50.01504 1063 250001 250201 265963463 66544274405863
+14	353288 26141 10 15801 1.02408 50.06168 1051 250000 250201 262960650 65792867340250
+15	379429 26131 10 15801 1.02408 50.06168 1051 0 817212 562629588 3.2940119126504e+014
+32	405560 47942 30 15785 1.07192 50.01504 2096 0 7504 15062136 108906731200
+33	453502 20831 36 15785 1.09168 50.01504 1048 0 0 0 0
+18	474333 21110 10 15785 1.02408 50.01504 1064 0 0 0 0
+vector 46 networksim2.DF1.tcp "rcvd seq" ETV
+vector 47 networksim2.DF1.tcp "rcvd ack" ETV
+vector 48 networksim2.SN1.tcp tcpRcvQueueBytes ETV
+vector 49 networksim2.SN1.tcp "advertised window" ETV
+vector 50 networksim2.SN1.tcp "receive window" ETV
+vector 51 networksim2.SN1.tcp "sent ack" ETV
+vector 52 networksim2.DF1.tcp "advertised window" ETV
+vector 53 networksim2.DF1.tcp "send window" ETV
+vector 54 networksim2.DF1.tcp tcpRcvQueueBytes ETV
+vector 55 networksim2.DF1.tcp "receive window" ETV
+vector 56 networksim2.DF1.tcp "sent ack" ETV
+vector 57 networksim2.SN1.tcp "rcvd seq" ETV
+vector 58 networksim2.SN1.tcp "rcvd ack" ETV
+vector 59 networksim2.SN1.tcp "send window" ETV
+vector 60 networksim2.SN1.tcp "sent seq" ETV
+vector 61 networksim2.SN1.tcp "unacked bytes" ETV
+vector 62 networksim2.DF1.tcp "unacked bytes" ETV
+vector 63 networksim2.DF1.tcp "rcvd dupAcks" ETV
+vector 64 networksim2.DF1.tcp "sent seq" ETV
+vector 65 networksim2.SN1.tcp "measured RTT" ETV
+vector 66 networksim2.SN1.tcp "smoothed RTT" ETV
+vector 67 networksim2.SN1.tcp RTTVAR ETV
+vector 68 networksim2.SN1.tcp RTO ETV
+vector 69 networksim2.SN1.tcp cwnd ETV
+vector 70 networksim2.SN1.tcp "rcvd dupAcks" ETV
+vector 71 networksim2.DF1.tcp "measured RTT" ETV
+vector 72 networksim2.DF1.tcp "smoothed RTT" ETV
+vector 73 networksim2.DF1.tcp RTTVAR ETV
+vector 74 networksim2.DF1.tcp RTO ETV
+vector 75 networksim2.DF1.tcp cwnd ETV
+0	496871 81 0 16044 0 75.05192 5 0 1 2 2
+1	496952 40983 0 16357 0 75.99872 2170 0 1 1085 1085
+2	537935 43060 0 16349 0 75.97872 2169 0 13 26512 329640
+3	580995 40965 0 16350 0 75.97872 2168 0 1 1084 1084
+8	621960 21580 5 16356 1 75.99872 1085 40 240 43808 1848672
+9	643540 20505 5 16356 1 75.99872 1085 0 0.00376 0.00752 2.82752e-005
+10	664045 22665 6 16357 1 75.99872 1085 40 240 43808 1848672
+11	686710 22665 6 16357 1 75.99872 1085 47 247 51403 2515149
+12	709375 22656 8 16344 1.02408 75.97584 1084 47 247 51356 2512940
+13	732031 22656 8 16344 1.02408 75.97584 1084 40 240 43768 1847072
+21	754687 23967 12 16348 1.02408 75.97584 1096 40 576 629160 362306464
+22	778654 28028 12 16349 1.02408 75.97872 1084 0 0.56256 591.60416 330.557384704
+23	806682 23734 13 16350 1.02408 75.97872 1084 40 576 622248 358325152
+24	830416 23734 13 16350 1.02408 75.97872 1084 47 583 629836 367089740
+25	854150 23715 15 16351 1.04816 75.99872 1083 47 583 629253 366749851
+26	877865 23715 15 16351 1.04816 75.99872 1083 40 576 621672 357993376
+46	901580 890 15815 16346 50.10832 75.97584 33 250201 18750201 378256032 7.032192020212e+015
+47	902470 818 15815 16346 50.10832 75.97584 33 0 18765133 356446407 6.6870549516601e+015
+48	903288 807 16022 16353 75 75.99872 39 0 0 0 0
+49	904095 603 16022 16353 75 75.99872 22 7504 18773173 394133185 7.3969075204502e+015
+50	904698 495 16022 16353 75 75.99872 21 7504 7504 157584 1182510336
+51	905193 572 16022 16353 75 75.99872 21 0 18765669 375212076 7.0392052846776e+015
+52	905765 945 16029 16346 75.02408 75.97584 34 18757505 18757705 637761570 1.1962935887395e+016
+53	906710 452 16029 16346 75.02408 75.97584 19 7504 7504 142576 1069890304
+54	907162 707 16029 16346 75.02408 75.97584 34 0 0 0 0
+55	907869 785 16029 16346 75.02408 75.97584 33 7504 7504 247632 1858230528
+56	908654 917 16029 16346 75.02408 75.97584 33 18750001 18750201 618756433 1.1601803738793e+016
+57	909571 557 16036 16353 75.04816 75.99872 20 18756020 18765133 375202427 7.0388432379005e+015
+58	910128 557 16036 16353 75.04816 75.99872 20 18750001 18750201 375003820 7.0313932507676e+015
+59	910685 48 16036 16067 75.04816 75.11544 2 7504 7504 15008 112620032
+60	910733 28 16040 16040 75.04816 75.04816 1 18750001 18750001 18750001 3.515625375e+014
+61	910761 44 16040 16067 75.04816 75.11544 2 0 200 200 40000
+62	910805 848 16049 16346 75.07192 75.97584 36 0 7504 155976 897800000
+63	911653 374 16055 16346 75.09168 75.97584 18 0 0 0 0
+64	912027 861 16058 16346 75.09168 75.97584 31 18756021 18772101 581685891 1.0914790254057e+016
+65	912888 27 16067 16067 75.11544 75.11544 1 0.06728 0.06728 0.06728 0.0045265984
+66	912915 27 16067 16067 75.11544 75.11544 1 0.00841 0.00841 0.00841 7.07281e-005
+67	912942 27 16067 16067 75.11544 75.11544 1 0.66466 0.66466 0.66466 0.4417729156
+68	912969 27 16067 16067 75.11544 75.11544 1 2.66705 2.66705 2.66705 7.1131557025
+69	912996 24 16067 16067 75.11544 75.11544 1 1072 1072 1072 1149184
+70	913020 396 16067 16353 75.11544 75.99872 19 0 0 0 0
+71	913416 133 16079 16331 75.18584 75.9292 5 0.0904 0.37312 0.83752 0.199762592
+72	913549 157 16079 16331 75.18584 75.9292 5 0.01177 0.090441662598 0.204428361817 0.012224487769221
+73	913706 155 16079 16331 75.18584 75.9292 5 0.462470913086 0.66802 2.73623690918 1.5259292693724
+74	913861 157 16079 16331 75.18584 75.9292 5 1.940325314942 2.68385 11.149375998537 25.249814756406
+75	914018 404 16079 16346 75.18584 75.97584 17 1072 9648 91120 605619968
+

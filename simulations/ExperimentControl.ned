@@ -14,5 +14,4 @@ simple ExperimentControl
 {
      parameters:
         @class(inet::ExperimentControl);
-        bool switch = default(false);
 }

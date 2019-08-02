@@ -19,55 +19,49 @@ namespace inet {
 
 Define_Module(ExperimentControl);
 
-void ExperimentControl::initialize(int stage) {
-    cSimpleModule::initialize(stage);
+void ExperimentControl::initialize() {
+    cSimpleModule::initialize();
+    setState();
 }
 
 void ExperimentControl::handleMessage(cMessage* msg) {
-    if (msg->getKind() == START_MSG && msg->isSelfMessage()) {
+    if (msg->getKind() == msg_kind::START_MSG && msg->isSelfMessage()) {
         this->state = newLayer;
-        switchActive = true;
+        getInstance().switchActive = true;
         delete msg;
-        msg = new cMessage("stop_tcp", STOP_TCP);
-        sendToTargets(msg);
-    } else if (msg->getKind() == END_MSG && msg->isSelfMessage()) {
+    } else if (msg->getKind() == msg_kind::END_MSG && msg->isSelfMessage()) {
         this->state = currentLayer;
-        switchActive = false;
+        getInstance().switchActive = false;
         delete msg;
         msg = new cMessage("restart_tcp", RESTART_TCP);
         sendToTargets(msg);
-    } else if (msg->getKind() == TIMER && msg->isSelfMessage()) {
-        if (!switchActive && simTime() < end_time) {
+    } else if (msg->getKind() == msg_kind::INIT_TIMER && msg->isSelfMessage()) {
+        if (!getInstance().getSwitchStatus() && simTime() < end_time) {
             // to make sure timeout arrives after route has been switched
             scheduleAt(simTime() + 0.01, msg);
-            return;
+        } else {
+            cMessage* stopMsg = new cMessage("stop_tcp", STOP_TCP);
+            sendToTargets(stopMsg);
+            sendToSources(msg);
         }
-        sendToSources(msg);
     } else {
         delete msg;
     }
 }
 
-ExperimentControl* ExperimentControl::getInstance() {
-    if (!instance) {
-        instance = new ExperimentControl;
-    }
-    return instance;
+int ExperimentControl::getState() const {
+    return getInstance().state;
 }
 
-int ExperimentControl::getState() {
-    return this->state;
-}
-
-bool ExperimentControl::getSwitchStatus() {
-    return switchActive;
+bool ExperimentControl::getSwitchStatus() const {
+    return getInstance().switchActive;
 }
 
 void ExperimentControl::setState() {
     if (currentLayer == newLayer) return;
-    cMessage* startMsg = new cMessage("start_msg", START_MSG);
-    cMessage* endMsg = new cMessage("end_msg", END_MSG);
-    cMessage* timeout = new cMessage("timeout", TIMER);
+    cMessage* startMsg = new cMessage("start_msg", msg_kind::START_MSG);
+    cMessage* endMsg = new cMessage("end_msg", msg_kind::END_MSG);
+    cMessage* timeout = new cMessage("timeout", msg_kind::INIT_TIMER);
     scheduleAt(start_time, startMsg);
     scheduleAt(end_time, endMsg);
     scheduleAt(start_time, timeout);
@@ -75,14 +69,14 @@ void ExperimentControl::setState() {
 
 void ExperimentControl::sendToSources(cMessage *msg) {
     for (std::string s : sources) {
-        std::string targetPath("networksim2." + s + "app[0]");
+        std::string targetPath("networksim2." + s + ".app[0]");
         sendDirect(msg, getModuleByPath(targetPath.c_str()), "appIn");
     }
 }
 
 void ExperimentControl::sendToTargets(cMessage *msg) {
     for (std::string s : targets) {
-        std::string targetPath("networksim2." + s + "app[0]");
+        std::string targetPath("networksim2." + s + ".app[0]");
         sendDirect(msg, getModuleByPath(targetPath.c_str()), "appIn");
     }
 }

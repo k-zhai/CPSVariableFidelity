@@ -16,6 +16,8 @@
 #ifndef DFNODE_H_
 #define DFNODE_H_
 
+#include "ExperimentControl.h"
+
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
@@ -24,15 +26,6 @@
 #include <string>
 
 namespace inet {
-
-//enum msgKind {
-//    APP_SELF_MSG = 11,
-//    APP_MSG_SENT = 12,
-//    APP_MSG_RETURNED = 13,
-//    TIMER = 14,
-//    RESTART_TCP = 15,
-//    STOP_TCP = 16
-//};
 
 class DFNode : public cSimpleModule, public LifecycleUnsupported {
 
@@ -52,11 +45,6 @@ class DFNode : public cSimpleModule, public LifecycleUnsupported {
         long bytesSent;
 
         std::map<int, ChunkQueue> socketQueue;
-
-        // temporary, until ExperimentControl is fixed
-        static bool switch_fidelity;
-        static const_simtime_t start_time;
-        static const_simtime_t end_time;
 
     public:
         virtual void sendBack(cMessage *msg);
