@@ -207,8 +207,8 @@ void SensorNode::handleMessage(cMessage *msg) {
         msg = new cMessage(nullptr, msg_kind::APP_SELF_MSG);
         scheduleAt(simTime() + propagationDelay, msg);
     } else if (msg->getKind() == msg_kind::APP_SELF_MSG) {
-        msg->setKind(APP_MSG_RETURNED);
-        cModule *targetModule = getModuleByPath("networksim2.DF1.app[0]");
+        msg->setKind(msg_kind::APP_MSG_RETURNED);
+        cModule *targetModule = getModuleByPath(getDirectDestination(getParentModule()->getName()));
         sendDirect(msg, targetModule, "appIn");
     } else if (msg->getKind() == msg_kind::STOP_TCP) {
         switchActive = true;
@@ -223,6 +223,15 @@ void SensorNode::handleMessage(cMessage *msg) {
     } else {
         OperationalBase::handleMessage(msg);
     }
+}
+
+const char* SensorNode::getDirectDestination(const char* currentMod) const {
+    if (strcmp(currentMod, "SN1") == 0 || strcmp(currentMod, "SN2") == 0) {
+        return "networksim.DF1.app[0]";
+    } else if (strcmp(currentMod, "SN3") == 0 || strcmp(currentMod, "SN4") == 0) {
+        return "networksim.DF2.app[0]";
+    }
+    return "";
 }
 
 }

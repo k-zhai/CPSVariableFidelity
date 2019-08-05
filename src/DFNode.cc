@@ -92,21 +92,6 @@ void DFNode::sendBack(cMessage *msg)
 
 void DFNode::handleMessage(cMessage *msg)
 {
-    // temporary
-//    if (msg->getKind() == START_MSG && msg->isSelfMessage()) {
-//        switch_fidelity = true;
-//        delete msg;
-//        msg = new cMessage(nullptr, STOP_TCP);
-//        sendDirect(msg, getModuleByPath("networksim2.SN1.app[0]"), "appIn");
-//        return;
-//    } else if (msg->getKind() == END_MSG && msg->isSelfMessage()) {
-//        switch_fidelity = false;
-//        delete msg;
-//        msg = new cMessage(nullptr, RESTART_TCP);
-//        sendDirect(msg, getModuleByPath("networksim2.SN1.app[0]"), "appIn");
-//        return;
-//    }
-
     if (ExperimentControl::getInstance().getSwitchStatus()) {
         if (msg->getKind() == msg_kind::TIMER || msg->getKind() == msg_kind::INIT_TIMER) {
             // Schedule next TIMER call
@@ -118,7 +103,7 @@ void DFNode::handleMessage(cMessage *msg)
             delayedMsgSend(msg, ExperimentControl::getInstance().getState());
         } else if (msg->getKind() == msg_kind::APP_SELF_MSG) {
             EV_INFO << "finalMsgSend " << simTime();
-            finalMsgSend(msg, "SN1", ExperimentControl::getInstance().getState());
+            finalMsgSendRouter(msg, getParentModule()->getName());
         } else if (msg->getKind() == msg_kind::APP_MSG_RETURNED) {
             saveData(msg);
         } else {
@@ -234,13 +219,10 @@ void DFNode::delayedMsgSend(cMessage* msg, int layer) {
 void DFNode::finalMsgSend(cMessage* msg, const char* mod, int layer) {
     switch (layer) {
         case 1:
-            if (msg->isSelfMessage() && msg->getKind() == msg_kind::APP_SELF_MSG) {
-                delete msg;
-                msg = new cMessage(nullptr, msg_kind::APP_MSG_SENT);
-                std::string s(mod);
-                std::string targetPath("networksim2." + s + ".app[0]");
-                cModule *targetModule = getModuleByPath(targetPath.c_str());
-                sendDirect(msg, targetModule, "appIn");
+            if (msg->getKind() == msg_kind::APP_SELF_MSG) {
+                cMessage *tmp = new cMessage(nullptr, msg_kind::APP_MSG_SENT);
+                cModule *targetModule = getModuleByPath(mod);
+                sendDirect(tmp, targetModule, "appIn");
             } else {
                 error("Must be a self message with kind APP_SELF_MSG");
             }
@@ -249,6 +231,26 @@ void DFNode::finalMsgSend(cMessage* msg, const char* mod, int layer) {
             error("Invalid route");
             break;
     }
+}
+
+void DFNode::finalMsgSendRouter(cMessage* msg, const char* currentMod) {
+    if (!msg->isSelfMessage()) {
+        error("Must be self message");
+    }
+    if (strcmp(currentMod, "DF1") == 0) {
+        for (std::string s : DF1targets) {
+            std::string targetPath("networksim." + s + ".app[0]");
+            finalMsgSend(msg, targetPath.c_str(), ExperimentControl::getInstance().getState());
+        }
+    } else if (strcmp(currentMod, "DF2") == 0) {
+        for (std::string s : DF2targets) {
+            std::string targetPath("networksim." + s + ".app[0]");
+            finalMsgSend(msg, targetPath.c_str(), ExperimentControl::getInstance().getState());
+        }
+    } else {
+        error("Current module not valid");
+    }
+    delete msg;
 }
 
 }

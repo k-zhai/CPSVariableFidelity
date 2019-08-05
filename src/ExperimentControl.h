@@ -42,8 +42,7 @@ class ExperimentControl : public cSimpleModule {
 
     private:
         static ExperimentControl* instance;
-        vector<string> sources = {"DF1"};
-        vector<string> targets = {"SN1"};
+
         short int state = 1;
         bool switchActive = false;
 
@@ -53,12 +52,16 @@ class ExperimentControl : public cSimpleModule {
         const_simtime_t start_time = 50;
         const_simtime_t end_time = 75;
 
+        vector<string> sources = {"DF1", "DF2"};
+        vector<string> targets = {"SN1", "SN2", "SN3", "SN4"};
+
         virtual void initialize() override;
         virtual void handleMessage(cMessage* msg) override;
 
     public:
         ExperimentControl() = default;
         ~ExperimentControl() = default;
+
         static ExperimentControl& getInstance() {
             static ExperimentControl instance;
             return instance;
@@ -71,6 +74,7 @@ class ExperimentControl : public cSimpleModule {
         void sendToSources(cMessage *msg);
         void sendToTargets(cMessage *msg);
 
+        virtual void finish() override;
 };
 
 }

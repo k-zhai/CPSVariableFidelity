@@ -30,7 +30,9 @@ namespace inet {
 class DFNode : public cSimpleModule, public LifecycleUnsupported {
 
     protected:
-        std::vector<std::string> data;
+        vector<string> data;
+        vector<string> DF1targets = {"SN1", "SN2"};
+        vector<string> DF2targets = {"SN3", "SN4"};
 
         const simtime_t propagationDelay = 0.01;
         const simtime_t frequency = 2;
@@ -60,6 +62,8 @@ class DFNode : public cSimpleModule, public LifecycleUnsupported {
 
         virtual void delayedMsgSend(cMessage* msg, int layer);
         virtual void finalMsgSend(cMessage* msg, const char* mod, int layer);
+
+        void finalMsgSendRouter(cMessage* msg, const char* currentMod);
 };
 
 }

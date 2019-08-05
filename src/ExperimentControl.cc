@@ -35,6 +35,7 @@ void ExperimentControl::handleMessage(cMessage* msg) {
         delete msg;
         msg = new cMessage("restart_tcp", RESTART_TCP);
         sendToTargets(msg);
+        delete msg;
     } else if (msg->getKind() == msg_kind::INIT_TIMER && msg->isSelfMessage()) {
         if (!getInstance().getSwitchStatus() && simTime() < end_time) {
             // to make sure timeout arrives after route has been switched
@@ -43,6 +44,8 @@ void ExperimentControl::handleMessage(cMessage* msg) {
             cMessage* stopMsg = new cMessage("stop_tcp", STOP_TCP);
             sendToTargets(stopMsg);
             sendToSources(msg);
+            delete stopMsg;
+            delete msg;
         }
     } else {
         delete msg;
@@ -69,17 +72,19 @@ void ExperimentControl::setState() {
 
 void ExperimentControl::sendToSources(cMessage *msg) {
     for (std::string s : sources) {
-        std::string targetPath("networksim2." + s + ".app[0]");
-        sendDirect(msg, getModuleByPath(targetPath.c_str()), "appIn");
+        std::string targetPath("networksim." + s + ".app[0]");
+        sendDirect(new cMessage(nullptr, msg->getKind()), getModuleByPath(targetPath.c_str()), "appIn");
     }
 }
 
 void ExperimentControl::sendToTargets(cMessage *msg) {
     for (std::string s : targets) {
-        std::string targetPath("networksim2." + s + ".app[0]");
-        sendDirect(msg, getModuleByPath(targetPath.c_str()), "appIn");
+        std::string targetPath("networksim." + s + ".app[0]");
+        sendDirect(new cMessage(nullptr, msg->getKind()), getModuleByPath(targetPath.c_str()), "appIn");
     }
 }
+
+void ExperimentControl::finish() {}
 
 }
 

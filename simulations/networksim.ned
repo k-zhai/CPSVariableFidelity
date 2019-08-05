@@ -20,12 +20,6 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import ned.DatarateChannel;
 import research.simulations.*;
 
-network networksim1
-{
-    submodules:
-        EC: ExperimentControl;
-}
-
 network networksim
 {
     parameters:
@@ -41,63 +35,27 @@ network networksim
     submodules:
         SN1: newStandardHost {
             parameters:
-                @display("p=114,223;i=device/pc");
+                @display("p=166.155,147.27376;i=device/pc");
         }
         SN2: newStandardHost {
             parameters:
-                @display("p=714,223;i=device/pc");
+                @display("p=412.87003,115.80501;i=device/pc");
         }
         DF1: newStandardHost {
             parameters:
-                @display("i=device/pc;p=466.2575,355.5075");
+                @display("i=device/pc;p=290.77127,326.01627");
         }
-        M: newStandardHost {
+        SN3: newStandardHost {
             parameters:
-                @display("i=device/pc;p=287.94998,421.9575");
+                @display("i=device/pc;p=512.3113,62.937504");
         }
-        EC: ExperimentControl {
+        SN4: newStandardHost {
             parameters:
-                @display("i=device/pc;p=112.965,421.9575");
+                @display("i=device/pc;p=881.12506,62.937504");
         }
-        configurator: Ipv4NetworkConfigurator {
+        DF2: newStandardHost {
             parameters:
-                @display("p=402,100");
-        }
-        netAnimTrace: NetAnimTrace {
-            parameters:
-                @display("p=227.03749,99.674995;is=s");
-        }
-    connections:
-        SN1.pppg++ <--> C <--> DF1.pppg++;
-        SN2.pppg++ <--> C <--> DF1.pppg++;
-        DF1.pppg++ <--> C <--> M.pppg++;
-
-}
-
-network networksim2
-{
-    parameters:
-        @display("bgb=1003.39496,554.8575");
-        double per = default(0);
-    types:
-        channel C extends DatarateChannel
-        {
-            datarate = 100000bps;
-            delay = 0.02s; //propagation delay
-            per = per;
-        }
-    submodules:
-        SN1: newStandardHost {
-            parameters:
-                @display("p=114,223;i=device/pc");
-        }
-        //        SN2: newStandardHost {
-        //            parameters:
-        //                @display("p=714,223;i=device/pc");
-        //        }
-        DF1: newStandardHost {
-            parameters:
-                @display("i=device/pc;p=466.2575,355.5075");
+                @display("i=device/pc;p=696.08875,147.27376");
         }
         //        M: newStandardHost {
         //            parameters:
@@ -105,19 +63,21 @@ network networksim2
         //        }
         EC: ExperimentControl {
             parameters:
-                @display("i=device/pc;p=112.965,421.9575");
+                @display("i=device/pc;p=166.155,47.8325");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=402,100");
+                @display("p=47.8325,47.8325");
         }
         netAnimTrace: NetAnimTrace {
             parameters:
-                @display("p=227.03749,99.674995;is=s");
+                @display("p=47.8325,137.20375;is=s");
         }
     connections:
         SN1.pppg++ <--> C <--> DF1.pppg++;
-//        SN2.pppg++ <--> C <--> DF1.pppg++;
+        SN2.pppg++ <--> C <--> DF1.pppg++;
+        SN3.pppg++ <--> C <--> DF2.pppg++;
+        SN4.pppg++ <--> C <--> DF2.pppg++;        
 //        DF1.pppg++ <--> C <--> M.pppg++;
 
 }

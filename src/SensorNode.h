@@ -58,6 +58,8 @@ class SensorNode : public TcpAppBase {
 
         virtual void handleMessage(cMessage *msg) override;
 
+        const char* getDirectDestination(const char* currentMod) const;
+
     public:
         SensorNode();
         virtual ~SensorNode();

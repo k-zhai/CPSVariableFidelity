@@ -3,7 +3,7 @@ last-configname=default_tcp
 last-runnumber=0
 
 [RunModeProfiles]
-run-playback-speed=1
+run-playback-speed=0.15848931924611134
 run-min-playback-speed=0.01
 run-max-playback-speed=100
 run-min-animation-speed=nan
