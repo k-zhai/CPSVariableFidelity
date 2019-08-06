@@ -31,11 +31,11 @@ class DFNode : public cSimpleModule, public LifecycleUnsupported {
 
     protected:
         vector<string> data;
-        vector<string> DF1targets = {"SN1", "SN2"};
-        vector<string> DF2targets = {"SN3", "SN4"};
+        const vector<string> DF1targets = {"SN1", "SN2"};
+        const vector<string> DF2targets = {"SN3", "SN4"};
 
-        const simtime_t propagationDelay = 0.01;
-        const simtime_t frequency = 2;
+        const_simtime_t propagationDelay = 0.01;
+        const_simtime_t frequency = 2;
 
         TcpSocket socket;
         simtime_t delay;
