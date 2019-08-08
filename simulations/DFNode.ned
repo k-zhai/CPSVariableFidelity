@@ -23,13 +23,24 @@ simple DFNode like IApp
     	@class(inet::DFNode);
     	string localAddress = default(""); // local address; may be left empty ("")
         int localPort = default(1000);     // localPort number to listen on
+        string connectAddress = default("");
+        int connectPort = default(2000);
         double replyDelay @unit(s) = default(0s);
+        double startTime @unit(s) = default(1s);
+        double stopTime @unit(s) = default(100s);
+        volatile int numRequestsPerSession = default(10);
+        volatile int requestLength @unit(B) = default(200B);
+        volatile int replyLength @unit(B) = default(1MiB);
+        volatile double thinkTime @unit(s);
+        volatile double idleInterval @unit(s);
+        volatile double reconnectInterval @unit(s) = default(30s);
         @display("i=block/app");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);
+        @signal[connect](type=long);
 //        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 //        @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 //        @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,weightedHistogram,vector; interpolationmode=none);

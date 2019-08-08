@@ -17,27 +17,34 @@
 #define DFNODE_H_
 
 #include "ExperimentControl.h"
+#include "inet/common/INETDefs.h"
 
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
+#include "inet/applications/tcpapp/TcpAppBase.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 #include <vector>
 #include <string>
 
 namespace inet {
 
-class DFNode : public cSimpleModule, public LifecycleUnsupported {
+class DFNode : public TcpAppBase, public LifecycleUnsupported {
 
     protected:
         vector<string> data;
         const vector<string> DF1targets = {"SN1", "SN2"};
         const vector<string> DF2targets = {"SN3", "SN4"};
 
+        bool switchActive = false;
+
         const_simtime_t propagationDelay = 0.01;
         const_simtime_t frequency = 2;
 
         TcpSocket socket;
+        TcpSocket *socketToMaster = nullptr;
         simtime_t delay;
         simtime_t maxMsgDelay;
 
@@ -47,6 +54,12 @@ class DFNode : public cSimpleModule, public LifecycleUnsupported {
         long bytesSent;
 
         std::map<int, ChunkQueue> socketQueue;
+        /* -------------------------------------------------------- */
+        cMessage *timeoutMsg = nullptr;
+        bool earlySend = false;
+        int numRequestsToSend = 0;
+        simtime_t startTime;
+        simtime_t stopTime;
 
     public:
         virtual void sendBack(cMessage *msg);
@@ -64,6 +77,24 @@ class DFNode : public cSimpleModule, public LifecycleUnsupported {
         virtual void finalMsgSend(cMessage* msg, const char* mod, int layer);
 
         void finalMsgSendRouter(cMessage* msg, const char* currentMod);
+        /* ----------------------------------------------------------------------- */
+        virtual void sendRequest();
+        virtual void rescheduleOrDeleteTimer(simtime_t d, short int msgKind);
+
+        virtual void handleTimer(cMessage *msg) override;
+
+        virtual void socketEstablished(TcpSocket *socket) override;
+        virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+        virtual void socketClosed(TcpSocket *socket) override;
+        virtual void socketFailure(TcpSocket *socket, int code) override;
+
+        virtual void handleStartOperation(LifecycleOperation *operation) override;
+        virtual void handleStopOperation(LifecycleOperation *operation) override;
+        virtual void handleCrashOperation(LifecycleOperation *operation) override;
+
+        virtual void close() override;
+
+        void handleDirectMessage(cMessage *msg);
 };
 
 }

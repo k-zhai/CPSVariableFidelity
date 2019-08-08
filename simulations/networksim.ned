@@ -57,10 +57,10 @@ network networksim
             parameters:
                 @display("i=device/pc;p=696.08875,147.27376");
         }
-//        M: newStandardHost {
-//            parameters:
-//                @display("i=device/pc;p=607.97626,399.02377");
-//        }
+        M: newStandardHost {
+            parameters:
+                @display("i=device/pc;p=607.97626,399.02377");
+        }
         EC: ExperimentControl {
             parameters:
                 @display("i=device/pc;p=166.155,47.8325");
@@ -78,7 +78,7 @@ network networksim
         SN2.pppg++ <--> C <--> DF1.pppg++;
         SN3.pppg++ <--> C <--> DF2.pppg++;
         SN4.pppg++ <--> C <--> DF2.pppg++;
-//        DF1.pppg++ <--> C <--> M.pppg++;
-//		  DF2.pppg++ <--> C <--> M.pppg++;
+		DF1.pppg++ <--> C <--> M.pppg++;
+		DF2.pppg++ <--> C <--> M.pppg++;
 
 }

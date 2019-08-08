@@ -32,6 +32,7 @@ class MasterNode : public cSimpleModule, public LifecycleUnsupported {
     protected:
         vector<string> data;
         const vector<string> targets = {"DF1", "DF2"};
+//        const vector<string> targets = {"DF1"};
 
         const simtime_t propagationDelay = 0.01;
         const simtime_t frequency = 2;

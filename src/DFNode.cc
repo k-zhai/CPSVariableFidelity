@@ -26,13 +26,20 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/packet/Packet.h"
+
 namespace inet {
+
+#define MSGKIND_CONNECT    0
+#define MSGKIND_SEND       1
 
 Define_Module(DFNode);
 
 void DFNode::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
+    TcpAppBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         delay = par("replyDelay");
@@ -45,6 +52,17 @@ void DFNode::initialize(int stage)
         WATCH(msgsSent);
         WATCH(bytesRcvd);
         WATCH(bytesSent);
+        /* --------------------------------------------------- */
+        numRequestsToSend = 0;
+        earlySend = false;
+        WATCH(numRequestsToSend);
+        WATCH(earlySend);
+
+        startTime = par("startTime");
+        stopTime = par("stopTime");
+        if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
+            throw cRuntimeError("Invalid startTime/stopTime parameters");
+        timeoutMsg = new cMessage("timer");
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         const char *localAddress = par("localAddress");
@@ -107,14 +125,23 @@ void DFNode::handleMessage(cMessage *msg)
         } else if (msg->getKind() == msg_kind::APP_MSG_RETURNED) {
             saveData(msg);
         } else {
-            delete msg;
+            handleDirectMessage(msg);
         }
+        return;
+    }
+
+    if (msg->getKind() == msg_kind::RESTART_TCP) {
+        timeoutMsg->setKind(MSGKIND_CONNECT);
+        scheduleAt(simTime(), timeoutMsg);
+        delete msg;
         return;
     }
 
     if (msg->isSelfMessage()) {
         if (msg->getKind() == msg_kind::TIMER) {
             delete msg;
+        } else if (msg->getKind() == MSGKIND_CONNECT || msg->getKind() == MSGKIND_SEND) {
+            handleTimer(msg);
         } else {
             sendBack(msg);
         }
@@ -131,6 +158,15 @@ void DFNode::handleMessage(cMessage *msg)
     else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {
         Packet *packet = check_and_cast<Packet *>(msg);
         int connId = packet->getTag<SocketInd>()->getSocketId();
+        if (connId == 23 || connId == 26 || connId == 37 || connId == 38) {
+            // data from SensorNode to DFNode is incorrectly going here
+            if (msg->getKind() == TCP_I_URGENT_DATA) {
+                socketDataArrived(socketToMaster, check_and_cast<Packet *>(msg), true);
+            } else {
+                socketDataArrived(socketToMaster, check_and_cast<Packet *>(msg), false);
+            }
+            return;
+        }
         ChunkQueue &queue = socketQueue[connId];
         auto chunk = packet->peekDataAt(B(0), packet->getTotalLength());
         queue.push(chunk);
@@ -171,12 +207,45 @@ void DFNode::handleMessage(cMessage *msg)
             request->setControlInfo(cmd);
             sendOrSchedule(request, delay + maxMsgDelay);
         }
-    }
-    else if (msg->getKind() == TCP_I_AVAILABLE)
+    } else if (msg->getKind() == TCP_I_AVAILABLE) {
         socket.processMessage(msg);
-    else {
-        // some indication -- ignore
-        EV_WARN << "drop msg: " << msg->getName() << ", kind:" << msg->getKind() << "(" << cEnum::get("inet::TcpStatusInd")->getStringFor(msg->getKind()) << ")\n";
+    } else {
+        if (msg->getKind() == TCP_I_ESTABLISHED) {
+            if (socketToMaster == nullptr) {
+                socketToMaster = new TcpSocket(msg);
+                socketToMaster->setOutputGate(gate("socketOut"));
+                socketEstablished(socketToMaster);
+            }
+            delete msg;
+        } else {
+            // some indication -- ignore
+            EV_WARN << "drop msg: " << msg->getName() << ", kind:" << msg->getKind() << "(" << cEnum::get("inet::TcpStatusInd")->getStringFor(msg->getKind()) << ")\n";
+            delete msg;
+//        }
+        }
+    }
+}
+
+void DFNode::handleDirectMessage(cMessage *msg) {
+    if (msg->getKind() == msg_kind::APP_MSG_SENT) {
+        delete msg;
+        msg = new cMessage(nullptr, msg_kind::APP_SELF_MSG_CLIENT);
+        scheduleAt(simTime() + propagationDelay, msg);
+    } else if (msg->getKind() == msg_kind::APP_SELF_MSG_CLIENT) {
+        msg->setKind(msg_kind::APP_MSG_RETURNED);
+        cModule *targetModule = getModuleByPath("networksim.M.app[0]");
+        sendDirect(msg, targetModule, "appIn");
+    } else if (msg->getKind() == msg_kind::STOP_TCP) {
+        socketToMaster->destroy();
+        delete socketToMaster;
+        socketToMaster = nullptr;
+        cancelEvent(timeoutMsg);
+        delete msg;
+    } else if (msg->getKind() == msg_kind::RESTART_TCP) {
+        timeoutMsg->setKind(MSGKIND_CONNECT);
+        scheduleAt(simTime(), timeoutMsg);
+        delete msg;
+    } else {
         delete msg;
     }
 }
@@ -190,6 +259,9 @@ void DFNode::refreshDisplay() const
 
 void DFNode::finish()
 {
+    cancelAndDelete(timeoutMsg);
+    delete socketToMaster;
+    socketToMaster = nullptr;
     EV_INFO << getFullPath() << ": sent " << bytesSent << " bytes in " << msgsSent << " packets\n";
     EV_INFO << getFullPath() << ": received " << bytesRcvd << " bytes in " << msgsRcvd << " packets\n";
 }
@@ -251,6 +323,156 @@ void DFNode::finalMsgSendRouter(cMessage* msg, const char* currentMod) {
         error("Current module not valid");
     }
     delete msg;
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+
+void DFNode::handleStartOperation(LifecycleOperation *operation)
+{
+    simtime_t now = simTime();
+    simtime_t start = std::max(startTime, now);
+    if (timeoutMsg && ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime))) {
+        timeoutMsg->setKind(MSGKIND_CONNECT);
+        scheduleAt(start, timeoutMsg);
+    }
+}
+
+void DFNode::handleStopOperation(LifecycleOperation *operation)
+{
+    cancelEvent(timeoutMsg);
+    if (socketToMaster->getState() == TcpSocket::CONNECTED || socketToMaster->getState() == TcpSocket::CONNECTING || socketToMaster->getState() == TcpSocket::PEER_CLOSED)
+        close();
+}
+
+void DFNode::handleCrashOperation(LifecycleOperation *operation)
+{
+    cancelEvent(timeoutMsg);
+    if (operation->getRootModule() != getContainingNode(this))
+        socketToMaster->destroy();
+}
+
+void DFNode::sendRequest()
+{
+    long requestLength = par("requestLength");
+    long replyLength = par("replyLength");
+    if (requestLength < 1)
+        requestLength = 1;
+    if (replyLength < 1)
+        replyLength = 1;
+
+    const auto& payload = makeShared<GenericAppMsg>();
+    Packet *packet = new Packet("data");
+    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    payload->setChunkLength(B(requestLength));
+    payload->setExpectedReplyLength(B(replyLength));
+    payload->setServerClose(false);
+    packet->insertAtBack(payload);
+
+    EV_INFO << "sending request with " << requestLength << " bytes, expected reply length " << replyLength << " bytes,"
+            << "remaining " << numRequestsToSend - 1 << " request\n";
+
+    sendPacket(packet);
+}
+
+void DFNode::handleTimer(cMessage *msg)
+{
+    switch (msg->getKind()) {
+        case MSGKIND_CONNECT:
+            connect();    // active OPEN
+
+            // significance of earlySend: if true, data will be sent already
+            // in the ACK of SYN, otherwise only in a separate packet (but still
+            // immediately)
+            if (earlySend)
+                sendRequest();
+            break;
+
+        case MSGKIND_SEND:
+            sendRequest();
+            numRequestsToSend--;
+            // no scheduleAt(): next request will be sent when reply to this one
+            // arrives (see socketDataArrived())
+            break;
+
+        default:
+            throw cRuntimeError("Invalid timer msg: kind=%d", msg->getKind());
+    }
+}
+
+void DFNode::socketEstablished(TcpSocket *socket)
+{
+    TcpAppBase::socketEstablished(socket);
+
+    // determine number of requests in this session
+    numRequestsToSend = par("numRequestsPerSession");
+    if (numRequestsToSend < 1)
+        numRequestsToSend = 1;
+
+    // perform first request if not already done (next one will be sent when reply arrives)
+    if (!earlySend)
+        sendRequest();
+
+    numRequestsToSend--;
+}
+
+void DFNode::rescheduleOrDeleteTimer(simtime_t d, short int msgKind)
+{
+    cancelEvent(timeoutMsg);
+
+    if (stopTime < SIMTIME_ZERO || d < stopTime) {
+        timeoutMsg->setKind(msgKind);
+        scheduleAt(d, timeoutMsg);
+    }
+    else {
+        delete timeoutMsg;
+        timeoutMsg = nullptr;
+    }
+}
+
+void DFNode::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
+{
+    TcpAppBase::socketDataArrived(socket, msg, urgent);
+
+    if (numRequestsToSend > 0 && !ExperimentControl::getInstance().getSwitchStatus()) {
+        EV_INFO << "reply arrived\n";
+
+        if (timeoutMsg) {
+            simtime_t d = simTime() + par("thinkTime");
+            rescheduleOrDeleteTimer(d, MSGKIND_SEND);
+        }
+    }
+    else if (socket->getState() != TcpSocket::LOCALLY_CLOSED) {
+        EV_INFO << "reply to last request arrived, closing session\n";
+        close();
+    }
+}
+
+void DFNode::close()
+{
+    TcpAppBase::close();
+    cancelEvent(timeoutMsg);
+}
+
+void DFNode::socketClosed(TcpSocket *socket)
+{
+    TcpAppBase::socketClosed(socket);
+
+    // start another session after a delay
+    if (timeoutMsg && !ExperimentControl::getInstance().getSwitchStatus()) {
+        simtime_t d = simTime() + par("idleInterval");
+        rescheduleOrDeleteTimer(d, MSGKIND_CONNECT);
+    }
+}
+
+void DFNode::socketFailure(TcpSocket *socket, int code)
+{
+    TcpAppBase::socketFailure(socket, code);
+
+    // reconnect after a delay
+    if (timeoutMsg) {
+        simtime_t d = simTime() + par("reconnectInterval");
+        rescheduleOrDeleteTimer(d, MSGKIND_CONNECT);
+    }
 }
 
 }

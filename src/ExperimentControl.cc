@@ -33,7 +33,7 @@ void ExperimentControl::handleMessage(cMessage* msg) {
         this->state = currentLayer;
         getInstance().switchActive = false;
         delete msg;
-        msg = new cMessage("restart_tcp", RESTART_TCP);
+        msg = new cMessage("restart_tcp", msg_kind::RESTART_TCP);
         sendToTargets(msg);
         delete msg;
     } else if (msg->getKind() == msg_kind::INIT_TIMER && msg->isSelfMessage()) {
@@ -41,7 +41,7 @@ void ExperimentControl::handleMessage(cMessage* msg) {
             // to make sure timeout arrives after route has been switched
             scheduleAt(simTime() + 0.01, msg);
         } else {
-            cMessage* stopMsg = new cMessage("stop_tcp", STOP_TCP);
+            cMessage* stopMsg = new cMessage("stop_tcp", msg_kind::STOP_TCP);
             sendToTargets(stopMsg);
             sendToSources(msg);
             delete stopMsg;

@@ -22,7 +22,7 @@ simple MasterNode like IApp
     parameters:
     	@class(inet::MasterNode);
     	string localAddress = default(""); // local address; may be left empty ("")
-        int localPort = default(1000);     // localPort number to listen on
+        int localPort = default(2000);     // localPort number to listen on
         double replyDelay @unit(s) = default(0s);
         @display("i=block/app");
         @lifecycleSupport;

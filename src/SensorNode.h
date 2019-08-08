@@ -28,7 +28,7 @@ namespace inet {
 class SensorNode : public TcpAppBase {
 
     protected:
-        const simtime_t propagationDelay = 0.01;
+        const_simtime_t propagationDelay = 0.01;
 
         bool switchActive = false;
 

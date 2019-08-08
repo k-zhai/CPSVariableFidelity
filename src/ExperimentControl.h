@@ -28,12 +28,13 @@ namespace inet {
 
 enum msg_kind : short int {
     APP_SELF_MSG = 11,
-    APP_MSG_SENT = 12,
-    APP_MSG_RETURNED = 13,
-    INIT_TIMER = 14,
-    TIMER = 15,
-    RESTART_TCP = 16,
-    STOP_TCP = 17,
+    APP_SELF_MSG_CLIENT = 12,
+    APP_MSG_SENT = 13,
+    APP_MSG_RETURNED = 14,
+    INIT_TIMER = 15,
+    TIMER = 16,
+    RESTART_TCP = 17,
+    STOP_TCP = 18,
     START_MSG = 20,
     END_MSG = 21
 };
@@ -53,7 +54,10 @@ class ExperimentControl : public cSimpleModule {
         const_simtime_t end_time = 75;
 
         const vector<string> sources = {"DF1", "DF2", "M"};
-        const vector<string> targets = {"SN1", "SN2", "SN3", "SN4"};
+        const vector<string> targets = {"SN1", "SN2", "SN3", "SN4", "DF1", "DF2"};
+
+//        const vector<string> sources = {"M"};
+//        const vector<string> targets = {"DF1"};
 
         virtual void initialize() override;
         virtual void handleMessage(cMessage* msg) override;
