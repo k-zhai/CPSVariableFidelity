@@ -30,7 +30,15 @@ PROJECTRELATIVE_PATH = src
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc, .msg and .sm files
-OBJS = $O/DFNode.o $O/ExperimentControl.o $O/MasterNode.o $O/SensorNode.o
+OBJS = \
+    $O/TCP/DFNode.o \
+    $O/TCP/ExperimentControl.o \
+    $O/TCP/MasterNode.o \
+    $O/TCP/SensorNode.o \
+    $O/UDP/DFNodeUDP.o \
+    $O/UDP/ExperimentControlUDP.o \
+    $O/UDP/MasterNodeUDP.o \
+    $O/UDP/SensorNodeUDP.o
 
 # Message files
 MSGFILES =

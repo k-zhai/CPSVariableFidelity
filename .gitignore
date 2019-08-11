@@ -34,3 +34,5 @@
 # Results
 *.vci
 *.vec
+*.sca
+*.anf

@@ -18,9 +18,9 @@ package research.simulations;
 import inet.common.misc.NetAnimTrace;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import ned.DatarateChannel;
-import research.simulations.*;
+import research.simulations.*.*;
 
-network networksim
+network TCPnetworksim
 {
     parameters:
         @display("bgb=1003.39496,554.8575");
@@ -28,8 +28,8 @@ network networksim
     types:
         channel C extends DatarateChannel
         {
-            datarate = 100000bps;
-            delay = 0.02s; //propagation delay
+            datarate = 10Mbps;
+            delay = 0.1us; //propagation delay
             per = per;
         }
     submodules:
@@ -67,7 +67,7 @@ network networksim
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=47.8325,47.8325");
+                @display("p=47.8325,47.8325;is=s");
         }
         netAnimTrace: NetAnimTrace {
             parameters:
@@ -80,5 +80,68 @@ network networksim
         SN4.pppg++ <--> C <--> DF2.pppg++;
 		DF1.pppg++ <--> C <--> M.pppg++;
 		DF2.pppg++ <--> C <--> M.pppg++;
-
 }
+
+network UDPnetworksim
+{
+    parameters:
+        @display("bgb=1003.39496,554.8575");
+        double per = default(0);
+    types:
+        channel C extends DatarateChannel
+        {
+            datarate = 10Mbps;
+            delay = 0.1us; //propagation delay
+            per = per;
+        }
+    submodules:
+        SN1: newStandardHost {
+            parameters:
+                @display("p=166.155,147.27376;i=device/pc");
+        }
+        SN2: newStandardHost {
+            parameters:
+                @display("p=412.87003,115.80501;i=device/pc");
+        }
+        DF1: newStandardHost {
+            parameters:
+                @display("i=device/pc;p=290.77127,326.01627");
+        }
+        SN3: newStandardHost {
+            parameters:
+                @display("i=device/pc;p=512.3113,62.937504");
+        }
+        SN4: newStandardHost {
+            parameters:
+                @display("i=device/pc;p=881.12506,62.937504");
+        }
+        DF2: newStandardHost {
+            parameters:
+                @display("i=device/pc;p=696.08875,147.27376");
+        }
+        M: newStandardHost {
+            parameters:
+                @display("i=device/pc;p=607.97626,399.02377");
+        }
+        EC: ExperimentControlUDP {
+            parameters:
+                @display("i=device/pc;p=166.155,47.8325");
+        }
+        configurator: Ipv4NetworkConfigurator {
+            parameters:
+                @display("p=47.8325,47.8325;is=s");
+        }
+        netAnimTrace: NetAnimTrace {
+            parameters:
+                @display("p=47.8325,137.20375;is=s");
+        }
+    connections allowunconnected:
+        SN1.pppg++ <--> C <--> DF1.pppg++;
+        SN2.pppg++ <--> C <--> DF1.pppg++;
+        SN3.pppg++ <--> C <--> DF2.pppg++;
+        SN4.pppg++ <--> C <--> DF2.pppg++;
+		DF1.pppg++ <--> C <--> M.pppg++;
+		DF2.pppg++ <--> C <--> M.pppg++;
+        
+    
+}    
