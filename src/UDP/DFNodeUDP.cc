@@ -61,6 +61,9 @@ void DFNodeUDP::initialize(int stage)
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         selfMsg = new cMessage("sendTimer");
+
+        directArrival = registerSignal("directMsgArrived");
+        udpArrival = registerSignal("udpPkArrived");
     }
 }
 
@@ -83,6 +86,7 @@ void DFNodeUDP::handleMessageWhenUp(cMessage *msg)
             finalMsgSendRouter(msg, getParentModule()->getName());
         } else if (msg->getKind() == msg_kind::APP_MSG_RETURNED) {
             saveData(msg);
+            emit(directArrival, SIMTIME_DBL(simTime()) - SIMTIME_DBL(lastDirectMsgTime));
             ExperimentControlUDP::getInstance().addDirectStats(lastDirectMsgTime, simTime());
         } else {
             handleDirectMessage(msg);
@@ -299,6 +303,8 @@ L3Address DFNodeUDP::chooseDestAddr()
 
 void DFNodeUDP::sendPacket()
 {
+    udpMsgTimes.push(simTime());
+
     std::ostringstream str;
     str << packetName << "-" << numSent;
     Packet *packet = new Packet(str.str().c_str());
@@ -321,6 +327,14 @@ void DFNodeUDP::processPacket(Packet *pk)
     EV_INFO << "Received packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
     delete pk;
     numReceived++;
+
+    if (!udpMsgTimes.empty()) {
+        if (SIMTIME_DBL(udpMsgTimes.front()) < 20) {
+            emit(udpArrival, SIMTIME_DBL(simTime()) - SIMTIME_DBL(udpMsgTimes.front()));
+            ExperimentControlUDP::getInstance().addUdpStats(udpMsgTimes.front(), simTime());
+        }
+        udpMsgTimes.pop();
+    }
 }
 
 void DFNodeUDP::setSocketOptions() {

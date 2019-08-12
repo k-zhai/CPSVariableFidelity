@@ -31,6 +31,9 @@ namespace inet {
 
 class SensorNode : public TcpAppBase {
 
+    private:
+        simsignal_t tcpArrival;
+
     protected:
         const_simtime_t propagationDelay = 0.01;
 

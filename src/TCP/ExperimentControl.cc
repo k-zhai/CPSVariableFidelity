@@ -104,8 +104,14 @@ void ExperimentControl::addDirectStats(simtime_t previousTime, simtime_t current
 }
 
 void ExperimentControl::finish() {
-    EV << "TCP time:       " << getInstance().tcpMsgStats->getMean() << endl;
-    EV << "Direct time:    " << getInstance().directMsgStats->getMean() << endl;
+    EV << "TCP time:" << endl;
+    EV << "     Mean: " << getInstance().tcpMsgStats->getMean() << endl;
+    EV << "     Min:  " << getInstance().tcpMsgStats->getMin() << endl;
+    EV << "     Max:  " << getInstance().tcpMsgStats->getMax() << endl;
+    EV << "Direct time:" << endl;
+    EV << "     Mean: " << getInstance().directMsgStats->getMean() << endl;
+    EV << "     Min:  " << getInstance().directMsgStats->getMin() << endl;
+    EV << "     Max:  " << getInstance().directMsgStats->getMax() << endl;
 }
 
 }

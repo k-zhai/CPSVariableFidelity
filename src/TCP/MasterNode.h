@@ -29,6 +29,9 @@ namespace inet {
 
 class MasterNode : public cSimpleModule, public LifecycleUnsupported {
 
+    private:
+        simsignal_t directArrival;
+
     protected:
         vector<string> data;
         const vector<string> targets = {"DF1", "DF2"};

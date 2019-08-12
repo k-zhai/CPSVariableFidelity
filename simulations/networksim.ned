@@ -28,8 +28,8 @@ network TCPnetworksim
     types:
         channel C extends DatarateChannel
         {
-            datarate = 10Mbps;
-            delay = 0.1us; //propagation delay
+            datarate = 100000bps;
+            delay = 0.1s; //propagation delay
             per = per;
         }
     submodules:
@@ -90,8 +90,8 @@ network UDPnetworksim
     types:
         channel C extends DatarateChannel
         {
-            datarate = 10Mbps;
-            delay = 0.1us; //propagation delay
+            datarate = 1Mbps;
+            delay = 0.01s; //propagation delay
             per = per;
         }
     submodules:
@@ -142,6 +142,4 @@ network UDPnetworksim
         SN4.pppg++ <--> C <--> DF2.pppg++;
 		DF1.pppg++ <--> C <--> M.pppg++;
 		DF2.pppg++ <--> C <--> M.pppg++;
-        
-    
 }    

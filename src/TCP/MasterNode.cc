@@ -45,6 +45,8 @@ void MasterNode::initialize(int stage)
         WATCH(msgsSent);
         WATCH(bytesRcvd);
         WATCH(bytesSent);
+
+        directArrival = registerSignal("directMsgArrived");
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         const char *localAddress = par("localAddress");
@@ -113,6 +115,7 @@ void MasterNode::handleMessage(cMessage *msg)
             delete msg;
         } else if (msg->getKind() == msg_kind::APP_MSG_RETURNED) {
             saveData(msg);
+            emit(directArrival, SIMTIME_DBL(simTime()) - SIMTIME_DBL(lastDirectMsgTime));
             ExperimentControl::getInstance().addDirectStats(lastDirectMsgTime, simTime());
         } else {
             delete msg;

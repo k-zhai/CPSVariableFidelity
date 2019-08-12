@@ -49,6 +49,8 @@ void SensorNode::initialize(int stage)
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         timeoutMsg = new cMessage("timer");
+
+        tcpArrival = registerSignal("tcpPkArrived");
     }
 }
 
@@ -160,7 +162,10 @@ void SensorNode::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
     TcpAppBase::socketDataArrived(socket, msg, urgent);
 
     if (!tcpMsgTimes.empty()) {
-        ExperimentControl::getInstance().addTcpStats(tcpMsgTimes.front(), simTime());
+        if (SIMTIME_DBL(tcpMsgTimes.front()) < 20) {
+            emit(tcpArrival, SIMTIME_DBL(simTime()) - SIMTIME_DBL(tcpMsgTimes.front()));
+            ExperimentControl::getInstance().addTcpStats(tcpMsgTimes.front(), simTime());
+        }
         tcpMsgTimes.pop();
     }
 

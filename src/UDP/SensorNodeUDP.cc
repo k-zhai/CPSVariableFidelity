@@ -54,6 +54,8 @@ void SensorNodeUDP::initialize(int stage)
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         selfMsg = new cMessage("sendTimer");
+
+        udpArrival = registerSignal("udpPkArrived");
     }
 }
 
@@ -106,6 +108,8 @@ L3Address SensorNodeUDP::chooseDestAddr()
 
 void SensorNodeUDP::sendPacket()
 {
+    udpMsgTimes.push(simTime());
+
     std::ostringstream str;
     str << packetName << "-" << numSent;
     Packet *packet = new Packet(str.str().c_str());
@@ -256,6 +260,14 @@ void SensorNodeUDP::processPacket(Packet *pk)
     EV_INFO << "Received packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
     delete pk;
     numReceived++;
+
+    if (!udpMsgTimes.empty()) {
+        if (SIMTIME_DBL(udpMsgTimes.front()) < 20) {
+            emit(udpArrival, SIMTIME_DBL(simTime()) - SIMTIME_DBL(udpMsgTimes.front()));
+            ExperimentControlUDP::getInstance().addUdpStats(udpMsgTimes.front(), simTime());
+        }
+        udpMsgTimes.pop();
+    }
 }
 
 void SensorNodeUDP::handleStartOperation(LifecycleOperation *operation)

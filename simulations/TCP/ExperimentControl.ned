@@ -14,4 +14,5 @@ simple ExperimentControl
 {
      parameters:
         @class(inet::ExperimentControl);
+        
 }

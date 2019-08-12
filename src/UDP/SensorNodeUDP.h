@@ -34,6 +34,9 @@ namespace inet {
 
 class SensorNodeUDP : public ApplicationBase, public UdpSocket::ICallback {
 
+    private:
+        simsignal_t udpArrival;
+
     protected:
         enum SelfMsgKinds { START = 1, SEND, STOP };
 

@@ -28,7 +28,9 @@ simple MasterNodeUDP like IApp
         double stopOperationExtraTime @unit(s) = default(-1s);
         double stopOperationTimeout @unit(s) = default(2s);
         @signal[packetSent](type=inet::Packet);
-//        @statistic[echoedPk](title="packets echoed"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @signal[directMsgArrived](type="double");
+        @statistic[echoedPk](title="packets echoed"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+    	@statistic[directTimes](title="direct msg times"; source="directMsgArrived"; record=histogram,vector,stats; interpolationmode=none);
     gates:
         input socketIn @labels(UdpControlInfo/up);
         output socketOut @labels(UdpControlInfo/down);

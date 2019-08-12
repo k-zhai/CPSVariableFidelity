@@ -70,6 +70,9 @@ void DFNode::initialize(int stage)
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         timeoutMsg = new cMessage("timer");
+
+        directArrival = registerSignal("directMsgArrived");
+        tcpArrival = registerSignal("tcpPkArrived");
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         const char *localAddress = par("localAddress");
@@ -134,6 +137,7 @@ void DFNode::handleMessage(cMessage *msg)
             finalMsgSendRouter(msg, getParentModule()->getName());
         } else if (msg->getKind() == msg_kind::APP_MSG_RETURNED) {
             saveData(msg);
+            emit(directArrival, SIMTIME_DBL(simTime()) - SIMTIME_DBL(lastDirectMsgTime));
             ExperimentControl::getInstance().addDirectStats(lastDirectMsgTime, simTime());
         } else {
             handleDirectMessage(msg);
@@ -444,7 +448,10 @@ void DFNode::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
     TcpAppBase::socketDataArrived(socket, msg, urgent);
 
     if (!tcpMsgTimes.empty()) {
-        ExperimentControl::getInstance().addTcpStats(tcpMsgTimes.front(), simTime());
+        if (SIMTIME_DBL(tcpMsgTimes.front()) < 20) {
+            emit(tcpArrival, SIMTIME_DBL(simTime()) - SIMTIME_DBL(tcpMsgTimes.front()));
+            ExperimentControl::getInstance().addTcpStats(tcpMsgTimes.front(), simTime());
+        }
         tcpMsgTimes.pop();
     }
 

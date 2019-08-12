@@ -36,6 +36,10 @@ namespace inet {
 
 class DFNode : public TcpAppBase, public LifecycleUnsupported {
 
+    private:
+        simsignal_t directArrival;
+        simsignal_t tcpArrival;
+
     protected:
         vector<string> data;
         const vector<string> DF1targets = {"SN1", "SN2"};

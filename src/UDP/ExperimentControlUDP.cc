@@ -21,6 +21,7 @@ Define_Module(ExperimentControlUDP);
 
 void ExperimentControlUDP::initialize() {
     cSimpleModule::initialize();
+
     delete udpMsgStats;
     delete directMsgStats;
     udpMsgStats = getInstance().udpMsgStats;
@@ -104,8 +105,14 @@ void ExperimentControlUDP::addDirectStats(simtime_t previousTime, simtime_t curr
 }
 
 void ExperimentControlUDP::finish() {
-    EV << "UDP time:       " << getInstance().udpMsgStats->getMean() << endl;
-    EV << "Direct time:    " << getInstance().directMsgStats->getMean() << endl;
+    EV << "UDP time:" << endl;
+    EV << "     Mean: " << getInstance().udpMsgStats->getMean() << endl;
+    EV << "     Min:  " << getInstance().udpMsgStats->getMin() << endl;
+    EV << "     Max:  " << getInstance().udpMsgStats->getMax() << endl;
+    EV << "Direct time:" << endl;
+    EV << "     Mean: " << getInstance().directMsgStats->getMean() << endl;
+    EV << "     Min:  " << getInstance().directMsgStats->getMin() << endl;
+    EV << "     Max:  " << getInstance().directMsgStats->getMax() << endl;
 }
 
 }

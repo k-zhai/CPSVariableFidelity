@@ -43,7 +43,11 @@ simple DFNodeUDP like IApp
         double stopOperationTimeout @unit(s) = default(2s);
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);
-//        @statistic[echoedPk](title="packets echoed"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @signal[directMsgArrived](type="double");
+        @signal[udpPkArrived](type="double");
+        @statistic[echoedPk](title="packets echoed"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+		@statistic[directTimes](title="direct msg times"; source="directMsgArrived"; record=vector,stats; interpolationmode=none);
+		@statistic[udpTimes](title="udp pk times"; source="udpPkArrived"; record=vector,stats; interpolationmode=none);
     gates:
         input socketIn @labels(UdpControlInfo/up);
         output socketOut @labels(UdpControlInfo/down);

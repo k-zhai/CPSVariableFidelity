@@ -32,6 +32,8 @@ void MasterNodeUDP::initialize(int stage)
         // init statistics
         numEchoed = 0;
         WATCH(numEchoed);
+
+        directArrival = registerSignal("directMsgArrived");
     }
 }
 
@@ -58,6 +60,7 @@ void MasterNodeUDP::handleMessageWhenUp(cMessage *msg)
             delete msg;
         } else if (msg->getKind() == msg_kind::APP_MSG_RETURNED) {
             saveData(msg);
+            emit(directArrival, SIMTIME_DBL(simTime()) - SIMTIME_DBL(lastDirectMsgTime));
             ExperimentControlUDP::getInstance().addDirectStats(lastDirectMsgTime, simTime());
         } else {
             delete msg;

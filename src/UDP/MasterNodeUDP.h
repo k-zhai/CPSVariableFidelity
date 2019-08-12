@@ -32,6 +32,9 @@ namespace inet {
 
 class MasterNodeUDP : public ApplicationBase, public UdpSocket::ICallback {
 
+    private:
+        simsignal_t directArrival;
+
     protected:
         UdpSocket socket;
         int numEchoed;    // just for WATCH
