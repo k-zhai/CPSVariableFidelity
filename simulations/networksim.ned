@@ -15,7 +15,7 @@
 
 package research.simulations;
 
-import inet.common.misc.NetAnimTrace;
+//import inet.common.misc.NetAnimTrace;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import ned.DatarateChannel;
 import research.simulations.*.*;
@@ -28,7 +28,7 @@ network TCPnetworksim
     types:
         channel C extends DatarateChannel
         {
-            datarate = 100000bps;
+            datarate = 0.1Mbps;
             delay = 0.1s; //propagation delay
             per = per;
         }
@@ -69,17 +69,13 @@ network TCPnetworksim
             parameters:
                 @display("p=47.8325,47.8325;is=s");
         }
-        netAnimTrace: NetAnimTrace {
-            parameters:
-                @display("p=47.8325,137.20375;is=s");
-        }
     connections:
         SN1.pppg++ <--> C <--> DF1.pppg++;
         SN2.pppg++ <--> C <--> DF1.pppg++;
         SN3.pppg++ <--> C <--> DF2.pppg++;
         SN4.pppg++ <--> C <--> DF2.pppg++;
-		DF1.pppg++ <--> C <--> M.pppg++;
-		DF2.pppg++ <--> C <--> M.pppg++;
+        DF1.pppg++ <--> C <--> M.pppg++;
+        DF2.pppg++ <--> C <--> M.pppg++;
 }
 
 network UDPnetworksim
@@ -131,15 +127,11 @@ network UDPnetworksim
             parameters:
                 @display("p=47.8325,47.8325;is=s");
         }
-        netAnimTrace: NetAnimTrace {
-            parameters:
-                @display("p=47.8325,137.20375;is=s");
-        }
     connections allowunconnected:
         SN1.pppg++ <--> C <--> DF1.pppg++;
         SN2.pppg++ <--> C <--> DF1.pppg++;
         SN3.pppg++ <--> C <--> DF2.pppg++;
         SN4.pppg++ <--> C <--> DF2.pppg++;
-		DF1.pppg++ <--> C <--> M.pppg++;
-		DF2.pppg++ <--> C <--> M.pppg++;
-}    
+        DF1.pppg++ <--> C <--> M.pppg++;
+        DF2.pppg++ <--> C <--> M.pppg++;
+}

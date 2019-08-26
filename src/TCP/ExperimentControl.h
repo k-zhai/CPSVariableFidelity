@@ -18,6 +18,7 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
 #include <omnetpp.h>
 
 using namespace omnetpp;
@@ -35,6 +36,7 @@ enum msg_kind : short int {
     TIMER = 16,
     RESTART_TCP = 17,
     STOP_TCP = 18,
+    RECORD_TIME = 19,
     START_MSG = 20,
     END_MSG = 21
 };
@@ -48,11 +50,11 @@ class ExperimentControl : public cSimpleModule {
     protected:
         const int currentLayer = 7;
         const int newLayer = 1;
-        const_simtime_t start_time = 50;
-        const_simtime_t end_time = 75;
+        const_simtime_t start_time = 100;
+        const_simtime_t end_time = 200;
 
-        const vector<string> sources = {"DF1", "DF2", "M"};
-        const vector<string> targets = {"SN1", "SN2", "SN3", "SN4", "DF1", "DF2"};
+        vector<string> sources = {"DF1", "DF2", "M"};
+        vector<string> targets = {"SN1", "SN2", "SN3", "SN4", "DF1", "DF2"};
 
         virtual void initialize() override;
         virtual void handleMessage(cMessage* msg) override;

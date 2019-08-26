@@ -56,6 +56,7 @@ class SensorNodeUDP : public ApplicationBase, public UdpSocket::ICallback {
         // state
         UdpSocket socket;
         cMessage *selfMsg = nullptr;
+        long packetsLost = 0;
 
         // statistics
         int numSent = 0;
@@ -65,7 +66,7 @@ class SensorNodeUDP : public ApplicationBase, public UdpSocket::ICallback {
         virtual void initialize(int stage) override;
         virtual void handleMessageWhenUp(cMessage *msg) override;
         virtual void finish() override;
-        virtual void refreshDisplay() const override;
+        virtual void refreshDisplay();
 
         // chooses random destination address
         virtual L3Address chooseDestAddr();

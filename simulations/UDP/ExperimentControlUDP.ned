@@ -19,4 +19,5 @@ simple ExperimentControlUDP
 {
     parameters:
         @class(inet::ExperimentControlUDP);
+        bool hasSwitch = default(true);
 }

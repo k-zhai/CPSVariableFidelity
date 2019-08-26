@@ -174,7 +174,6 @@ void DFNode::handleMessage(cMessage *msg)
         Packet *packet = check_and_cast<Packet *>(msg);
         int connId = packet->getTag<SocketInd>()->getSocketId();
         if (connId == 23 || connId == 26 || connId == 37 || connId == 38) {
-            // data from SensorNode to DFNode is incorrectly going here
             if (msg->getKind() == TCP_I_URGENT_DATA) {
                 socketDataArrived(socketToMaster, check_and_cast<Packet *>(msg), true);
             } else {
@@ -448,7 +447,7 @@ void DFNode::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
     TcpAppBase::socketDataArrived(socket, msg, urgent);
 
     if (!tcpMsgTimes.empty()) {
-        if (SIMTIME_DBL(tcpMsgTimes.front()) < 20) {
+        if (SIMTIME_DBL(tcpMsgTimes.front()) < 10) {
             emit(tcpArrival, SIMTIME_DBL(simTime()) - SIMTIME_DBL(tcpMsgTimes.front()));
             ExperimentControl::getInstance().addTcpStats(tcpMsgTimes.front(), simTime());
         }

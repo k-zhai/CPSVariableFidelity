@@ -35,7 +35,7 @@ class SensorNode : public TcpAppBase {
         simsignal_t tcpArrival;
 
     protected:
-        const_simtime_t propagationDelay = 0.01;
+        const_simtime_t propagationDelay = 0.1;
 
         bool switchActive = false;
 

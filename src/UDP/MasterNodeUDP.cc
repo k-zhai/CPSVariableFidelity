@@ -34,11 +34,25 @@ void MasterNodeUDP::initialize(int stage)
         WATCH(numEchoed);
 
         directArrival = registerSignal("directMsgArrived");
+        realTime = registerSignal("recordWallTime");
+        pkLossCount = registerSignal("totalPacketsLost");
+
+        startClock = clock();
+
+        cMessage *wallTime = new cMessage("record_wall_time", msg_kind::RECORD_TIME);
+        scheduleAt(simTime(), wallTime);
     }
 }
 
 void MasterNodeUDP::handleMessageWhenUp(cMessage *msg)
 {
+    if (msg->getKind() == msg_kind::RECORD_TIME) {
+        emit(realTime, (clock() - startClock) / (double) CLOCKS_PER_SEC);
+        emit(pkLossCount, ExperimentControlUDP::getInstance().getTotalPacketsLost());
+        scheduleAt(simTime() + 1, msg);
+        return;
+    }
+
     if (ExperimentControlUDP::getInstance().getSwitchStatus()) {
         if (msg->getKind() == msg_kind::TIMER || msg->getKind() == msg_kind::INIT_TIMER) {
             // Set time

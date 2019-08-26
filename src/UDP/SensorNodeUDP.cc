@@ -188,9 +188,14 @@ void SensorNodeUDP::handleMessageWhenUp(cMessage *msg)
         cModule* targetModule = getModuleByPath(getDirectDestination(getParentModule()->getName()));
         sendDirect(msg, targetModule, "appIn");
     } else if (msg->getKind() == msg_kind::STOP_UDP) {
-        socket.destroy();
-        cancelEvent(selfMsg);
-        delete msg;
+        // check if udpMsgTimes is empty
+        if (udpMsgTimes.empty()) {
+            socket.destroy();
+            cancelEvent(selfMsg);
+            delete msg;
+        } else {
+            scheduleAt(simTime() + 0.01, msg);
+        }
     } else if (msg->getKind() == msg_kind::RESTART_UDP) {
         selfMsg->setKind(START);
         scheduleAt(simTime(), selfMsg);
@@ -245,7 +250,7 @@ void SensorNodeUDP::socketClosed(UdpSocket *socket)
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
-void SensorNodeUDP::refreshDisplay() const
+void SensorNodeUDP::refreshDisplay()
 {
     ApplicationBase::refreshDisplay();
 
@@ -261,8 +266,13 @@ void SensorNodeUDP::processPacket(Packet *pk)
     delete pk;
     numReceived++;
 
+    ExperimentControlUDP::getInstance().appendTotalPacketsLost((long)(numSent-numReceived) - packetsLost);
+    if (packetsLost < numSent-numReceived) {
+        packetsLost = numSent-numReceived;
+    }
+
     if (!udpMsgTimes.empty()) {
-        if (SIMTIME_DBL(udpMsgTimes.front()) < 20) {
+        if (SIMTIME_DBL(udpMsgTimes.front()) < 20) { // TODO add calculation for outliers
             emit(udpArrival, SIMTIME_DBL(simTime()) - SIMTIME_DBL(udpMsgTimes.front()));
             ExperimentControlUDP::getInstance().addUdpStats(udpMsgTimes.front(), simTime());
         }

@@ -22,6 +22,11 @@ Define_Module(ExperimentControlUDP);
 void ExperimentControlUDP::initialize() {
     cSimpleModule::initialize();
 
+    if (!par("hasSwitch")) {
+        sources.clear();
+        targets.clear();
+    }
+
     delete udpMsgStats;
     delete directMsgStats;
     udpMsgStats = getInstance().udpMsgStats;
@@ -102,6 +107,14 @@ void ExperimentControlUDP::addUdpStats(simtime_t previousTime, simtime_t current
 
 void ExperimentControlUDP::addDirectStats(simtime_t previousTime, simtime_t currentTime) {
     directMsgStats->collect(SIMTIME_DBL(currentTime) - SIMTIME_DBL(previousTime));
+}
+
+void ExperimentControlUDP::appendTotalPacketsLost(long packets) {
+    totalPacketsLost += packets;
+}
+
+long ExperimentControlUDP::getTotalPacketsLost() const {
+    return totalPacketsLost;
 }
 
 void ExperimentControlUDP::finish() {

@@ -328,6 +328,11 @@ void DFNodeUDP::processPacket(Packet *pk)
     delete pk;
     numReceived++;
 
+    ExperimentControlUDP::getInstance().appendTotalPacketsLost((long)(numSent-numReceived) - packetsLost);
+    if (packetsLost < numSent-numReceived) {
+        packetsLost = numSent-numReceived;
+    }
+
     if (!udpMsgTimes.empty()) {
         if (SIMTIME_DBL(udpMsgTimes.front()) < 20) {
             emit(udpArrival, SIMTIME_DBL(simTime()) - SIMTIME_DBL(udpMsgTimes.front()));

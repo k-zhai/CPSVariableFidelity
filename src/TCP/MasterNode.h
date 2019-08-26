@@ -24,6 +24,9 @@
 
 #include <vector>
 #include <string>
+#include <chrono>
+
+typedef std::chrono::system_clock Clock;
 
 namespace inet {
 
@@ -31,12 +34,15 @@ class MasterNode : public cSimpleModule, public LifecycleUnsupported {
 
     private:
         simsignal_t directArrival;
+        simsignal_t realTime;
+
+        std::chrono::time_point<Clock> startClock;
 
     protected:
         vector<string> data;
         const vector<string> targets = {"DF1", "DF2"};
 
-        const_simtime_t propagationDelay = 0.01;
+        const_simtime_t propagationDelay = 0.1;
         const_simtime_t frequency = 2;
 
         TcpSocket socket;

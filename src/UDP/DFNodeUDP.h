@@ -43,6 +43,7 @@ class DFNodeUDP : public ApplicationBase, public UdpSocket::ICallback {
 
         UdpSocket socket;
         cMessage *selfMsg = nullptr;
+        long packetsLost = 0;
 
         vector<L3Address> destAddresses;
         vector<string> destAddressStr;

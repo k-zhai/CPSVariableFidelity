@@ -45,7 +45,7 @@ class DFNode : public TcpAppBase, public LifecycleUnsupported {
         const vector<string> DF1targets = {"SN1", "SN2"};
         const vector<string> DF2targets = {"SN3", "SN4"};
 
-        const_simtime_t propagationDelay = 0.01;
+        const_simtime_t propagationDelay = 0.1;
         const_simtime_t frequency = 2;
 
         TcpSocket socket;

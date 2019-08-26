@@ -24,6 +24,7 @@
 
 #include <vector>
 #include <string>
+#include <ctime>
 
 using std::vector;
 using std::string;
@@ -34,6 +35,10 @@ class MasterNodeUDP : public ApplicationBase, public UdpSocket::ICallback {
 
     private:
         simsignal_t directArrival;
+        simsignal_t realTime;
+        simsignal_t pkLossCount;
+
+        clock_t startClock;
 
     protected:
         UdpSocket socket;

@@ -162,7 +162,7 @@ void SensorNode::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
     TcpAppBase::socketDataArrived(socket, msg, urgent);
 
     if (!tcpMsgTimes.empty()) {
-        if (SIMTIME_DBL(tcpMsgTimes.front()) < 20) {
+        if (SIMTIME_DBL(tcpMsgTimes.front()) < 10) {
             emit(tcpArrival, SIMTIME_DBL(simTime()) - SIMTIME_DBL(tcpMsgTimes.front()));
             ExperimentControl::getInstance().addTcpStats(tcpMsgTimes.front(), simTime());
         }

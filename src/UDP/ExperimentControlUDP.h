@@ -33,6 +33,7 @@ enum msg_kind : short int {
     TIMER = 16,
     RESTART_UDP = 17,
     STOP_UDP = 18,
+    RECORD_TIME = 19,
     START_MSG = 20,
     END_MSG = 21
 };
@@ -44,15 +45,16 @@ class ExperimentControlUDP : public cSimpleModule {
     private:
         short int state = 1;
         bool switchActive = false;
+        long totalPacketsLost = 0;
 
     protected:
         const int currentLayer = 7;
         const int newLayer = 1;
-        const_simtime_t start_time = 25;
-        const_simtime_t end_time = 50;
+        const_simtime_t start_time = 100;
+        const_simtime_t end_time = 200;
 
-        const vector<string> sources = {"DF1", "DF2", "M"};
-        const vector<string> targets = {"SN1", "SN2", "SN3", "SN4", "DF1", "DF2"};
+        vector<string> sources = {"DF1", "DF2", "M"};
+        vector<string> targets = {"SN1", "SN2", "SN3", "SN4", "DF1", "DF2"};
 
         virtual void initialize() override;
         virtual void handleMessage(cMessage* msg) override;
@@ -80,6 +82,9 @@ class ExperimentControlUDP : public cSimpleModule {
 
         void addUdpStats(simtime_t previousTime, simtime_t currentTime);
         void addDirectStats(simtime_t previousTime, simtime_t currentTime);
+
+        void appendTotalPacketsLost(long packets);
+        long getTotalPacketsLost() const;
 
         virtual void finish() override;
 };

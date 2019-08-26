@@ -47,6 +47,12 @@ void MasterNode::initialize(int stage)
         WATCH(bytesSent);
 
         directArrival = registerSignal("directMsgArrived");
+        realTime = registerSignal("recordWallTime");
+
+        startClock = Clock::now();
+
+        cMessage *wallTime = new cMessage("record_wall_time", msg_kind::RECORD_TIME);
+        scheduleAt(simTime(), wallTime);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         const char *localAddress = par("localAddress");
@@ -94,6 +100,13 @@ void MasterNode::sendBack(cMessage *msg)
 
 void MasterNode::handleMessage(cMessage *msg)
 {
+    if (msg->getKind() == msg_kind::RECORD_TIME) {
+        std::chrono::duration<double> elapsed_seconds = Clock::now() - startClock;
+        emit(realTime, elapsed_seconds.count());
+        scheduleAt(simTime() + 1, msg);
+        return;
+    }
+
     if (ExperimentControl::getInstance().getSwitchStatus()) {
         if (msg->getKind() == msg_kind::TIMER || msg->getKind() == msg_kind::INIT_TIMER) {
             // Set time

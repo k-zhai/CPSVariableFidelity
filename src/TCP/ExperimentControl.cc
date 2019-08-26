@@ -21,6 +21,12 @@ Define_Module(ExperimentControl);
 
 void ExperimentControl::initialize() {
     cSimpleModule::initialize();
+
+    if (!par("hasSwitch")) {
+        sources.clear();
+        targets.clear();
+    }
+
     delete tcpMsgStats;
     delete directMsgStats;
     tcpMsgStats = getInstance().tcpMsgStats;
