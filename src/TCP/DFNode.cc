@@ -249,11 +249,15 @@ void DFNode::handleDirectMessage(cMessage *msg) {
         cModule *targetModule = getModuleByPath("TCPnetworksim.M.app[0]");
         sendDirect(msg, targetModule, "appIn");
     } else if (msg->getKind() == msg_kind::STOP_TCP) {
-        socketToMaster->destroy();
-        delete socketToMaster;
-        socketToMaster = nullptr;
-        cancelEvent(timeoutMsg);
-        delete msg;
+        if (!tcpMsgTimes.empty()) {
+            scheduleAt(simTime() + 0.01, msg);
+        } else {
+            socketToMaster->destroy();
+            delete socketToMaster;
+            socketToMaster = nullptr;
+            cancelEvent(timeoutMsg);
+            delete msg;
+        }
     } else if (msg->getKind() == msg_kind::RESTART_TCP) {
         timeoutMsg->setKind(MSGKIND_CONNECT);
         scheduleAt(simTime(), timeoutMsg);

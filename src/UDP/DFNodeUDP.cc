@@ -140,9 +140,13 @@ void DFNodeUDP::handleDirectMessage(cMessage *msg) {
         cModule* targetModule = getModuleByPath("UDPnetworksim.M.app[0]");
         sendDirect(msg, targetModule, "appIn");
     } else if (msg->getKind() == msg_kind::STOP_UDP) {
-        socket.destroy();
-        cancelEvent(selfMsg);
-        delete msg;
+        if (udpMsgTimes.empty()) {
+            socket.destroy();
+            cancelEvent(selfMsg);
+            delete msg;
+        } else {
+            scheduleAt(simTime() + 0.01, msg);
+        }
     } else if (msg != selfMsg) {
         delete msg;
     }

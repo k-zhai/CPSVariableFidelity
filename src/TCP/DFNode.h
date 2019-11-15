@@ -53,6 +53,7 @@ class DFNode : public TcpAppBase, public LifecycleUnsupported {
         simtime_t delay;
         simtime_t maxMsgDelay;
 
+        // Server-side variables
         long msgsRcvd;
         long msgsSent;
         long bytesRcvd;

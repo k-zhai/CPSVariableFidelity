@@ -188,7 +188,7 @@ void SensorNodeUDP::handleMessageWhenUp(cMessage *msg)
         cModule* targetModule = getModuleByPath(getDirectDestination(getParentModule()->getName()));
         sendDirect(msg, targetModule, "appIn");
     } else if (msg->getKind() == msg_kind::STOP_UDP) {
-        // check if udpMsgTimes is empty
+        // check if udpMsgTimes is empty, packet consistency
         if (udpMsgTimes.empty()) {
             socket.destroy();
             cancelEvent(selfMsg);

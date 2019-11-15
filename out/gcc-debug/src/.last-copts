@@ -1,1 +1,0 @@
--g -Wall -MMD -MP -MF .d    -isystem /usr/include -isystem /mingw64/include -fno-stack-protector  -DXMLPARSER=libxml -DPREFER_QTENV -DWITH_QTENV -DWITH_PARSIM -DWITH_NETBUILDER -DWITH_OSG -DWITH_OSGEARTH  -DINET_IMPORT -IC:/Users/kzhai/omnetpp-5.5/samples/inet/src -IC:/Users/kzhai/omnetpp-5.5/include
