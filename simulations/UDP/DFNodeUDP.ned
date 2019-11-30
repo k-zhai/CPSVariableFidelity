@@ -53,4 +53,6 @@ simple DFNodeUDP like IApp
         output socketOut @labels(UdpControlInfo/down);
         input appIn @directIn;
 	    output appOut;
+	    input transportIn @directIn;
+	    output transportOut;
 }

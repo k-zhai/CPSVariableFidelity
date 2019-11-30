@@ -19,6 +19,7 @@
 #include <vector>
 #include <string>
 #include <omnetpp.h>
+#include <inet/transportlayer/udp/pathTrackingUDP.h>
 
 using namespace omnetpp;
 using std::string;
@@ -35,7 +36,7 @@ enum msg_kind : short int {
     STOP_UDP = 18,
     RECORD_TIME = 19,
     START_MSG = 20,
-    END_MSG = 21
+    END_MSG = 21,
 };
 
 namespace inet {
@@ -43,13 +44,13 @@ namespace inet {
 class ExperimentControlUDP : public cSimpleModule {
 
     private:
-        short int state = 1;
+        short int state = 5;
         bool switchActive = false;
         long totalPacketsLost = 0;
 
     protected:
-        const int currentLayer = 7;
-        const int newLayer = 1;
+        const int currentLayer = 5; // number of layers simulated initially
+        const int newLayer = 2; // number of layers simulated after switch
         const_simtime_t start_time = 100;
         const_simtime_t end_time = 200;
 
@@ -85,6 +86,8 @@ class ExperimentControlUDP : public cSimpleModule {
 
         void appendTotalPacketsLost(long packets);
         long getTotalPacketsLost() const;
+
+        int getNewLayer() const;
 
         virtual void finish() override;
 };

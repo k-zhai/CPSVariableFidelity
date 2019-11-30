@@ -3,15 +3,15 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
 #include "ExperimentControlUDP.h"
 
@@ -43,30 +43,52 @@ ExperimentControlUDP::~ExperimentControlUDP() {
 
 void ExperimentControlUDP::handleMessage(cMessage* msg) {
     if (msg->getKind() == msg_kind::START_MSG && msg->isSelfMessage()) {
-        this->state = newLayer;
+        getInstance().state = newLayer;
         getInstance().switchActive = true;
         delete msg;
     } else if (msg->getKind() == msg_kind::END_MSG && msg->isSelfMessage()) {
-        this->state = currentLayer;
         getInstance().switchActive = false;
         delete msg;
-        msg = new cMessage("restart_udp", msg_kind::RESTART_UDP);
-        sendToTargets(msg);
-        delete msg;
+
+        if (getInstance().state == 1) {
+            msg = new cMessage("restart_udp", msg_kind::RESTART_UDP);
+            sendToTargets(msg);
+            delete msg;
+        } else if (getInstance().state == 2) {
+            cMessage* startMsg = new cMessage("start_L4", msg_kind_transport::L4_START);
+            sendToTargets(startMsg);
+            sendToSources(startMsg);
+            delete msg;
+        }
+
+        getInstance().state = currentLayer;
+
     } else if (msg->getKind() == msg_kind::INIT_TIMER && msg->isSelfMessage()) {
         if (!getInstance().getSwitchStatus() && simTime() < end_time) {
             // to make sure timeout arrives after route has been switched
             scheduleAt(simTime() + 0.01, msg);
         } else {
-            cMessage* stopMsg = new cMessage("stop_udp", msg_kind::STOP_UDP);
-            sendToTargets(stopMsg);
-            sendToSources(msg);
-            delete stopMsg;
-            delete msg;
+            if (getInstance().state == 1) {
+                cMessage* stopMsg = new cMessage("stop_udp", msg_kind::STOP_UDP);
+                sendToTargets(stopMsg);
+                sendToSources(msg);
+                delete stopMsg;
+                delete msg;
+            } else if (getInstance().state == 2) {
+                cMessage* stopMsg = new cMessage("stop_L4", msg_kind_transport::L4_STOP);
+                sendToTargets(stopMsg);
+                sendToSources(stopMsg);
+                delete stopMsg;
+                delete msg;
+            }
         }
     } else {
         delete msg;
     }
+}
+
+int ExperimentControlUDP::getNewLayer() const {
+    return getInstance().newLayer;
 }
 
 int ExperimentControlUDP::getState() const {
@@ -88,16 +110,30 @@ void ExperimentControlUDP::setState() {
 }
 
 void ExperimentControlUDP::sendToSources(cMessage *msg) {
-    for (std::string s : sources) {
-        std::string targetPath("UDPnetworksim." + s + ".app[0]");
-        sendDirect(new cMessage(nullptr, msg->getKind()), getModuleByPath(targetPath.c_str()), "appIn");
+    if (getInstance().state == 1) {
+        for (std::string s : sources) {
+            std::string targetPath("UDPnetworksim." + s + ".app[0]");
+            sendDirect(new cMessage("sending", msg->getKind()), getModuleByPath(targetPath.c_str()), "appIn");
+        }
+    } else if (getInstance().state == 2) {
+        for (std::string s : sources) {
+            std::string targetPath("UDPnetworksim." + s + ".udp");
+            sendDirect(new cMessage("sending", msg->getKind()), getModuleByPath(targetPath.c_str()), "transportIn");
+        }
     }
 }
 
 void ExperimentControlUDP::sendToTargets(cMessage *msg) {
-    for (std::string s : targets) {
-        std::string targetPath("UDPnetworksim." + s + ".app[0]");
-        sendDirect(new cMessage(nullptr, msg->getKind()), getModuleByPath(targetPath.c_str()), "appIn");
+    if (getInstance().state == 1) {
+        for (std::string s : targets) {
+            std::string targetPath("UDPnetworksim." + s + ".app[0]");
+            sendDirect(new cMessage("sending", msg->getKind()), getModuleByPath(targetPath.c_str()), "appIn");
+        }
+    } else if (getInstance().state == 2) {
+        for (std::string s : targets) {
+            std::string targetPath("UDPnetworksim." + s + ".udp");
+            sendDirect(new cMessage("sending", msg->getKind()), getModuleByPath(targetPath.c_str()), "transportIn");
+        }
     }
 }
 
