@@ -64,16 +64,25 @@ void ExperimentControlUDP::handleMessage(cMessage* msg) {
         getInstance().state = currentLayer;
 
     } else if (msg->getKind() == msg_kind::INIT_TIMER && msg->isSelfMessage()) {
-        if (!getInstance().getSwitchStatus() && simTime() < end_time) {
+        if ((!getInstance().getSwitchStatus() && simTime() < end_time)) {
             // to make sure timeout arrives after route has been switched
             scheduleAt(simTime() + 0.01, msg);
         } else {
             if (getInstance().state == 1) {
-                cMessage* stopMsg = new cMessage("stop_udp", msg_kind::STOP_UDP);
-                sendToTargets(stopMsg);
-                sendToSources(msg);
-                delete stopMsg;
-                delete msg;
+                if (!stopSent) {
+                    cMessage* stopMsg = new cMessage("stop_udp", msg_kind::STOP_UDP);
+                    sendToTargets(stopMsg);
+                    stopSent = true;
+                    delete stopMsg;
+                }
+
+                if (getInstance().getNumNodes() == getInstance().getNumReady()) {
+                    sendToSources(msg);
+                    delete msg;
+                } else {
+                    scheduleAt(simTime() + 0.01, msg);
+                }
+
             } else if (getInstance().state == 2) {
                 cMessage* stopMsg = new cMessage("stop_L4", msg_kind_transport::L4_STOP);
                 sendToTargets(stopMsg);
@@ -135,6 +144,22 @@ void ExperimentControlUDP::sendToTargets(cMessage *msg) {
             sendDirect(new cMessage("sending", msg->getKind()), getModuleByPath(targetPath.c_str()), "transportIn");
         }
     }
+}
+
+int ExperimentControlUDP::getNumNodes() const {
+    return getInstance().numNodes;
+}
+
+int ExperimentControlUDP::getNumReady() const {
+    return getInstance().numNodesReady;
+}
+
+void ExperimentControlUDP::incrementNumNodes() {
+    ++getInstance().numNodes;
+}
+
+void ExperimentControlUDP::incrementNumReady() {
+    ++getInstance().numNodesReady;
 }
 
 void ExperimentControlUDP::addUdpStats(simtime_t previousTime, simtime_t currentTime) {

@@ -41,6 +41,7 @@ void MasterNodeUDP::initialize(int stage)
 
         cMessage *wallTime = new cMessage("record_wall_time", msg_kind::RECORD_TIME);
         scheduleAt(simTime(), wallTime);
+
     }
 }
 
@@ -54,7 +55,7 @@ void MasterNodeUDP::handleMessageWhenUp(cMessage *msg)
     }
 
     if (ExperimentControlUDP::getInstance().getSwitchStatus()) {
-        if (ExperimentControlUDP::getInstance().getState() == 1) {
+        if (ExperimentControlUDP::getInstance().getState() == 1 && ExperimentControlUDP::getInstance().getNumNodes() == ExperimentControlUDP::getInstance().getNumReady()) {
             if (msg->getKind() == msg_kind::TIMER || msg->getKind() == msg_kind::INIT_TIMER) {
                 // Set time
                 lastDirectMsgTime = simTime();
@@ -64,10 +65,10 @@ void MasterNodeUDP::handleMessageWhenUp(cMessage *msg)
                 scheduleAt(simTime() + frequency, tmMsg);
 
                 // Schedule message to be finally sent after propagation delay
-                EV_INFO << "delayedMsgSend " << simTime();
+                EV_INFO << "delayedMsgSend " << getParentModule()->getName() << " " << simTime();
                 delayedMsgSend(msg, ExperimentControlUDP::getInstance().getState());
             } else if (msg->getKind() == msg_kind::APP_SELF_MSG) {
-                EV_INFO << "finalMsgSend " << simTime();
+                EV_INFO << "finalMsgSend " << getParentModule()->getName() << " " << simTime();
                 for (std::string s : targets) {
                     std::string targetPath("UDPnetworksim." + s + ".app[0]");
                     finalMsgSend(msg, targetPath.c_str(), ExperimentControlUDP::getInstance().getState());
@@ -80,6 +81,8 @@ void MasterNodeUDP::handleMessageWhenUp(cMessage *msg)
             } else {
                 delete msg;
             }
+        } else {
+            socket.processMessage(msg);
         }
     } else if (msg->isSelfMessage() && msg->getKind() == msg_kind::TIMER) {
         delete msg;

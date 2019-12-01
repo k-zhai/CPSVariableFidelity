@@ -37,6 +37,7 @@ class DFNodeUDP : public ApplicationBase, public UdpSocket::ICallback {
     private:
         simsignal_t directArrival;
         simsignal_t udpArrival;
+        bool ready = false;
 
     protected:
         enum SelfMsgKinds { START = 1, SEND, STOP };

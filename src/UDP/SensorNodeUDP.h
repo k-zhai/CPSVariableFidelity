@@ -36,6 +36,7 @@ class SensorNodeUDP : public ApplicationBase, public UdpSocket::ICallback {
 
     private:
         simsignal_t udpArrival;
+        bool ready = false;
 
     protected:
         enum SelfMsgKinds { START = 1, SEND, STOP };

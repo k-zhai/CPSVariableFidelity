@@ -47,6 +47,10 @@ class ExperimentControlUDP : public cSimpleModule {
         short int state = 5;
         bool switchActive = false;
         long totalPacketsLost = 0;
+        int numNodes = 0;
+        int numNodesReady = 0;
+
+        bool stopSent = false;
 
     protected:
         const int currentLayer = 5; // number of layers simulated initially
@@ -88,6 +92,12 @@ class ExperimentControlUDP : public cSimpleModule {
         long getTotalPacketsLost() const;
 
         int getNewLayer() const;
+
+        int getNumNodes() const;
+        int getNumReady() const;
+
+        void incrementNumNodes();
+        void incrementNumReady();
 
         virtual void finish() override;
 };
