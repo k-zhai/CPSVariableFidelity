@@ -43,30 +43,50 @@ ExperimentControl::~ExperimentControl() {
 
 void ExperimentControl::handleMessage(cMessage* msg) {
     if (msg->getKind() == msg_kind::START_MSG && msg->isSelfMessage()) {
-        this->state = newLayer;
+        getInstance().state = newLayer;
         getInstance().switchActive = true;
         delete msg;
     } else if (msg->getKind() == msg_kind::END_MSG && msg->isSelfMessage()) {
-        this->state = currentLayer;
         getInstance().switchActive = false;
         delete msg;
-        msg = new cMessage("restart_tcp", msg_kind::RESTART_TCP);
-        sendToTargets(msg);
-        delete msg;
+
+        if (getInstance().state == 1) {
+            msg = new cMessage("restart_tcp", msg_kind::RESTART_TCP);
+            sendToTargets(msg);
+            delete msg;
+        } else if (getInstance().state == 2) {
+            cMessage* startMsg = new cMessage("start_L4", msg_kind_transport::L4_START);
+            sendToTargets(startMsg);
+            delete msg;
+        }
+
+        getInstance().state = currentLayer;
+
     } else if (msg->getKind() == msg_kind::INIT_TIMER && msg->isSelfMessage()) {
         if (!getInstance().getSwitchStatus() && simTime() < end_time) {
             // to make sure timeout arrives after route has been switched
             scheduleAt(simTime() + 0.01, msg);
         } else {
-            cMessage* stopMsg = new cMessage("stop_tcp", msg_kind::STOP_TCP);
-            sendToTargets(stopMsg);
-            sendToSources(msg);
-            delete stopMsg;
-            delete msg;
+            if (getInstance().state == 1) {
+                cMessage* stopMsg = new cMessage("stop_tcp", msg_kind::STOP_TCP);
+                sendToTargets(stopMsg);
+                sendToSources(msg);
+                delete stopMsg;
+                delete msg;
+            } else if (getInstance().state == 2) {
+                cMessage* stopMsg = new cMessage("stop_L4", msg_kind_transport::L4_STOP);
+                sendToTargets(stopMsg);
+                delete stopMsg;
+                delete msg;
+            }
         }
     } else {
         delete msg;
     }
+}
+
+int ExperimentControl::getNewLayer() const {
+    return getInstance().newLayer;
 }
 
 int ExperimentControl::getState() const {
@@ -88,16 +108,30 @@ void ExperimentControl::setState() {
 }
 
 void ExperimentControl::sendToSources(cMessage *msg) {
-    for (std::string s : sources) {
-        std::string targetPath("TCPnetworksim." + s + ".app[0]");
-        sendDirect(new cMessage(nullptr, msg->getKind()), getModuleByPath(targetPath.c_str()), "appIn");
+    if (getInstance().state == 1) {
+        for (std::string s : sources) {
+            std::string targetPath("TCPnetworksim." + s + ".app[0]");
+            sendDirect(new cMessage(nullptr, msg->getKind()), getModuleByPath(targetPath.c_str()), "appIn");
+        }
+    } else if (getInstance().state == 2) {
+        for (std::string s : sources) {
+            std::string targetPath("TCPnetworksim." + s + ".tcp");
+            sendDirect(new cMessage("to source", msg->getKind()), getModuleByPath(targetPath.c_str()), "transportIn");
+        }
     }
 }
 
 void ExperimentControl::sendToTargets(cMessage *msg) {
-    for (std::string s : targets) {
-        std::string targetPath("TCPnetworksim." + s + ".app[0]");
-        sendDirect(new cMessage(nullptr, msg->getKind()), getModuleByPath(targetPath.c_str()), "appIn");
+    if (getInstance().state == 1) {
+        for (std::string s : targets) {
+            std::string targetPath("TCPnetworksim." + s + ".app[0]");
+            sendDirect(new cMessage(nullptr, msg->getKind()), getModuleByPath(targetPath.c_str()), "appIn");
+        }
+    } else if (getInstance().state == 2) {
+        for (std::string s : targets) {
+            std::string targetPath("TCPnetworksim." + s + ".tcp");
+            sendDirect(new cMessage("to target", msg->getKind()), getModuleByPath(targetPath.c_str()), "transportIn");
+        }
     }
 }
 

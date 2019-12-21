@@ -20,6 +20,7 @@
 #include <string>
 #include <algorithm>
 #include <omnetpp.h>
+#include <inet/transportlayer/tcp/pathTracking.h>
 
 using namespace omnetpp;
 using std::string;
@@ -44,12 +45,12 @@ enum msg_kind : short int {
 class ExperimentControl : public cSimpleModule {
 
     private:
-        short int state = 1;
+        short int state = 5;
         bool switchActive = false;
 
     protected:
-        const int currentLayer = 7;
-        const int newLayer = 1;
+        const int currentLayer = 5; // number of layers simulated initially
+        const int newLayer = 1; // number of layers simulated after switch
         const_simtime_t start_time = 100;
         const_simtime_t end_time = 200;
 
@@ -79,6 +80,8 @@ class ExperimentControl : public cSimpleModule {
 
         void sendToSources(cMessage *msg);
         void sendToTargets(cMessage *msg);
+
+        int getNewlayer() const;
 
         void addTcpStats(simtime_t previousTime, simtime_t currentTime);
         void addDirectStats(simtime_t previousTime, simtime_t currentTime);

@@ -52,4 +52,6 @@ simple SensorNode like IApp
 	    output socketOut @labels(TcpCommand/down);
 	    input appIn @directIn;
 	    output appOut;
+	    input transportIn @directIn;
+	    output transportOut;
 }

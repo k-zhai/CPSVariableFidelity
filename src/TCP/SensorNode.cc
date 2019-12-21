@@ -225,13 +225,9 @@ void SensorNode::handleMessage(cMessage *msg) {
     } else if (msg->getKind() == msg_kind::STOP_TCP) {
         switchActive = true;
         // TODO: Check for packets still in progress
-        if (!tcpMsgTimes.empty()) {
-            scheduleAt(simTime() + 0.01, msg);
-        } else {
-            socket.destroy();
-            cancelEvent(timeoutMsg);
-            delete msg;
-        }
+        socket.destroy();
+        cancelEvent(timeoutMsg);
+        delete msg;
     } else if (msg->getKind() == msg_kind::RESTART_TCP) {
         switchActive = false;
         timeoutMsg->setKind(MSGKIND_CONNECT);
