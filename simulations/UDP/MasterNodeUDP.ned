@@ -23,6 +23,19 @@ simple MasterNodeUDP like IApp
         @class(inet::MasterNodeUDP);
         string interfaceTableModule;
         int localPort;
+        int destPort;
+        string localAddress = default("");
+        double startTime @unit(s) = default(this.sendInterval); // application start time (start of the first packet)
+        double stopTime @unit(s) = default(-1s);  // time of finishing sending, -1s means forever
+        volatile double sendInterval @unit(s); // should usually be a random value, e.g. exponential(1)
+        volatile int messageLength @unit(B); // length of messages to generate, in bytes
+        string packetName = default("UdpBasicAppData");
+        int timeToLive = default(5);
+        int typeOfService = default(-1);
+        bool dontFragment = default(false);
+        string multicastInterface = default("");  // if not empty, set the multicast output interface option on the socket (interface name expected)
+        bool receiveBroadcast = default(false); // if true, makes the socket receive broadcast packets
+        bool joinLocalMulticastGroups = default(false); // if true, makes the socket receive packets from all multicast groups set on local interfaces
         @display("i=block/app");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);

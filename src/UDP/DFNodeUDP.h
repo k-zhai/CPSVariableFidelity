@@ -23,12 +23,16 @@
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 #include <vector>
+#include <queue>
 #include <string>
 #include <queue>
+#include <map>
+#include <iterator>
 
 using std::vector;
-using std::string;
 using std::queue;
+using std::string;
+using std::map;
 
 namespace inet {
 
@@ -42,6 +46,8 @@ class DFNodeUDP : public ApplicationBase, public UdpSocket::ICallback {
     protected:
         enum SelfMsgKinds { START = 1, SEND, STOP };
 
+        int id;
+
         UdpSocket socket;
         cMessage *selfMsg = nullptr;
         long packetsLost = 0;
@@ -54,9 +60,7 @@ class DFNodeUDP : public ApplicationBase, public UdpSocket::ICallback {
         bool dontFragment = false;
         const char *packetName = nullptr;
 
-        vector<string> data;
-        const vector<string> DF1targets = {"SN1", "SN2"};
-        const vector<string> DF2targets = {"SN3", "SN4"};
+        queue<Packet> data;
 
         const_simtime_t propagationDelay = 0.01;
         const_simtime_t frequency = 2;
@@ -75,7 +79,7 @@ class DFNodeUDP : public ApplicationBase, public UdpSocket::ICallback {
         virtual void refreshDisplay() const override;
 
         void handleDirectMessage(cMessage *msg);
-        void saveData(cMessage* msg);
+        void saveData(Packet* pk);
 
         virtual void delayedMsgSend(cMessage* msg, int layer);
         virtual void finalMsgSend(cMessage* msg, const char* mod, int layer);
@@ -92,7 +96,7 @@ class DFNodeUDP : public ApplicationBase, public UdpSocket::ICallback {
 
         /* ------------------------------------------------------------------------------------- */
 
-        virtual L3Address chooseDestAddr();
+        virtual L3Address chooseDestAddr(short kind=0);
         virtual void sendPacket();
         virtual void processPacket(Packet *msg);
         virtual void setSocketOptions();

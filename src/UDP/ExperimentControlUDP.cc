@@ -23,8 +23,8 @@ void ExperimentControlUDP::initialize() {
     cSimpleModule::initialize();
 
     if (!par("hasSwitch")) {
-        sources.clear();
-        targets.clear();
+        upstream.clear();
+        downstream.clear();
     }
 
     delete udpMsgStats;
@@ -41,6 +41,14 @@ ExperimentControlUDP::~ExperimentControlUDP() {
     directMsgStats = nullptr;
 }
 
+vector<string> ExperimentControlUDP::getMasterRoute(short kind) {
+    if (getInstance().routingFromMaster.find(kind) == routingFromMaster.end()) {
+        vector<string> none = {"none"};
+        return none;
+    }
+    return getInstance().routingFromMaster.find(kind)->second;
+}
+
 void ExperimentControlUDP::handleMessage(cMessage* msg) {
     if (msg->getKind() == msg_kind::START_MSG && msg->isSelfMessage()) {
         getInstance().state = newLayer;
@@ -52,13 +60,13 @@ void ExperimentControlUDP::handleMessage(cMessage* msg) {
 
         if (getInstance().state == 1) {
             msg = new cMessage("restart_udp", msg_kind::RESTART_UDP);
-            sendToTargets(msg);
+            sendToDownstream(msg);
             delete msg;
         } else if (getInstance().state == 2) {
-            cMessage* startMsg = new cMessage("start_L4", msg_kind_transport::L4_START);
-            sendToTargets(startMsg);
-            sendToSources(startMsg);
-            delete msg;
+//            cMessage* startMsg = new cMessage("start_L4", msg_kind_transport::L4_START);
+//            sendToTargets(startMsg);
+//            sendToSources(startMsg);
+//            delete msg;
         }
 
         getInstance().state = currentLayer;
@@ -69,26 +77,17 @@ void ExperimentControlUDP::handleMessage(cMessage* msg) {
             scheduleAt(simTime() + 0.01, msg);
         } else {
             if (getInstance().state == 1) {
-                if (!stopSent) {
-                    cMessage* stopMsg = new cMessage("stop_udp", msg_kind::STOP_UDP);
-                    sendToTargets(stopMsg);
-                    stopSent = true;
-                    delete stopMsg;
-                }
-
-                if (getInstance().getNumNodes() == getInstance().getNumReady()) {
-                    sendToSources(msg);
-                    delete msg;
-                } else {
-                    scheduleAt(simTime() + 0.01, msg);
-                }
-
-            } else if (getInstance().state == 2) {
-                cMessage* stopMsg = new cMessage("stop_L4", msg_kind_transport::L4_STOP);
-                sendToTargets(stopMsg);
-                sendToSources(stopMsg);
+                cMessage* stopMsg = new cMessage("stop_udp", msg_kind::STOP_UDP);
+                sendToDownstream(stopMsg);
+                sendToDownstream(msg);
                 delete stopMsg;
                 delete msg;
+            } else if (getInstance().state == 2) {
+//                cMessage* stopMsg = new cMessage("stop_L4", msg_kind_transport::L4_STOP);
+//                sendToTargets(stopMsg);
+//                sendToSources(stopMsg);
+//                delete stopMsg;
+//                delete msg;
             }
         }
     } else {
@@ -118,31 +117,31 @@ void ExperimentControlUDP::setState() {
     scheduleAt(start_time, timeout);
 }
 
-void ExperimentControlUDP::sendToSources(cMessage *msg) {
+void ExperimentControlUDP::sendToUpstream(cMessage *msg) {
     if (getInstance().state == 1) {
-        for (std::string s : sources) {
+        for (std::string s : upstream) {
             std::string targetPath("UDPnetworksim." + s + ".app[0]");
             sendDirect(new cMessage("sending", msg->getKind()), getModuleByPath(targetPath.c_str()), "appIn");
         }
     } else if (getInstance().state == 2) {
-        for (std::string s : sources) {
-            std::string targetPath("UDPnetworksim." + s + ".udp");
-            sendDirect(new cMessage("sending", msg->getKind()), getModuleByPath(targetPath.c_str()), "transportIn");
-        }
+//        for (std::string s : sources) {
+//            std::string targetPath("UDPnetworksim." + s + ".udp");
+//            sendDirect(new cMessage("sending", msg->getKind()), getModuleByPath(targetPath.c_str()), "transportIn");
+//        }
     }
 }
 
-void ExperimentControlUDP::sendToTargets(cMessage *msg) {
+void ExperimentControlUDP::sendToDownstream(cMessage *msg) {
     if (getInstance().state == 1) {
-        for (std::string s : targets) {
+        for (std::string s : downstream) {
             std::string targetPath("UDPnetworksim." + s + ".app[0]");
             sendDirect(new cMessage("sending", msg->getKind()), getModuleByPath(targetPath.c_str()), "appIn");
         }
     } else if (getInstance().state == 2) {
-        for (std::string s : targets) {
-            std::string targetPath("UDPnetworksim." + s + ".udp");
-            sendDirect(new cMessage("sending", msg->getKind()), getModuleByPath(targetPath.c_str()), "transportIn");
-        }
+//        for (std::string s : targets) {
+//            std::string targetPath("UDPnetworksim." + s + ".udp");
+//            sendDirect(new cMessage("sending", msg->getKind()), getModuleByPath(targetPath.c_str()), "transportIn");
+//        }
     }
 }
 

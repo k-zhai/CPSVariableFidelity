@@ -23,11 +23,13 @@
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 #include <vector>
+#include <queue>
 #include <string>
 #include <ctime>
 
 using std::vector;
 using std::string;
+using std::queue;
 
 namespace inet {
 
@@ -42,10 +44,26 @@ class MasterNodeUDP : public ApplicationBase, public UdpSocket::ICallback {
 
     protected:
         UdpSocket socket;
+        cMessage *selfMsg = nullptr;
         int numEchoed;    // just for WATCH
 
-        vector<string> data;
-        const vector<string> targets = {"DF1", "DF2"};
+        bool dontFragment = false;
+
+        enum SelfMsgKinds { START = 1, SEND, STOP };
+
+        vector<short> master_msg_kinds = {50, 51, 52, 53};
+        const char *packetName = nullptr;
+
+        simtime_t startTime;
+        simtime_t stopTime;
+
+        int destPort = -1;
+
+        queue<Packet> data;
+
+        vector<string> destAddrs = {"DF1", "DF2"};
+        vector<L3Address> destAddresses;
+        vector<string> destAddressStr;
 
         const_simtime_t propagationDelay = 0.01;
         const_simtime_t frequency = 2;
@@ -59,6 +77,14 @@ class MasterNodeUDP : public ApplicationBase, public UdpSocket::ICallback {
         virtual void finish() override;
         virtual void refreshDisplay() const override;
 
+        virtual L3Address chooseDestAddr(short msg_kind);
+        virtual void sendPacket();
+        virtual void setSocketOptions();
+
+        virtual void processStart();
+        virtual void processSend();
+        virtual void processStop();
+
         virtual void handleStartOperation(LifecycleOperation *operation) override;
         virtual void handleStopOperation(LifecycleOperation *operation) override;
         virtual void handleCrashOperation(LifecycleOperation *operation) override;
@@ -67,7 +93,7 @@ class MasterNodeUDP : public ApplicationBase, public UdpSocket::ICallback {
         virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
         virtual void socketClosed(UdpSocket *socket) override;
 
-        void saveData(cMessage* msg);
+        void saveData(Packet* pk);
 
         virtual void delayedMsgSend(cMessage* msg, int layer);
         virtual void finalMsgSend(cMessage* msg, const char* mod, int layer);

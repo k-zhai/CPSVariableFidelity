@@ -31,7 +31,7 @@ simple DFNodeUDP like IApp
         double startTime @unit(s) = default(this.sendInterval); // application start time (start of the first packet)
         double stopTime @unit(s) = default(-1s);  // time of finishing sending, -1s means forever
         volatile double sendInterval @unit(s); // should usually be a random value, e.g. exponential(1)
-        int timeToLive = default(-1); // if not -1, set the TTL (IPv4) or Hop Limit (IPv6) field of sent packets to this value
+        int timeToLive = default(5); // if not -1, set the TTL (IPv4) or Hop Limit (IPv6) field of sent packets to this value
         bool dontFragment = default(false); // if true, asks IP to not fragment the message during routing
         int typeOfService = default(-1); // if not -1, set the ToS (IPv4) or Traffic Class (IPv6) field of sent packets to this value
         string multicastInterface = default("");  // if not empty, set the multicast output interface option on the socket (interface name expected)

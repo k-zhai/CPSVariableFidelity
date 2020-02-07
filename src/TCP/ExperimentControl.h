@@ -50,7 +50,7 @@ class ExperimentControl : public cSimpleModule {
 
     protected:
         const int currentLayer = 5; // number of layers simulated initially
-        const int newLayer = 1; // number of layers simulated after switch
+        const int newLayer = 2; // number of layers simulated after switch
         const_simtime_t start_time = 100;
         const_simtime_t end_time = 200;
 
@@ -81,7 +81,7 @@ class ExperimentControl : public cSimpleModule {
         void sendToSources(cMessage *msg);
         void sendToTargets(cMessage *msg);
 
-        int getNewlayer() const;
+        int getNewLayer() const;
 
         void addTcpStats(simtime_t previousTime, simtime_t currentTime);
         void addDirectStats(simtime_t previousTime, simtime_t currentTime);

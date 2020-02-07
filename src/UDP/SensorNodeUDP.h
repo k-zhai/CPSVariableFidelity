@@ -19,10 +19,13 @@
 #include <vector>
 #include <string>
 #include <queue>
+#include <map>
+#include <iterator>
 
 using std::vector;
 using std::string;
 using std::queue;
+using std::map;
 
 #include "ExperimentControlUDP.h"
 #include "inet/common/INETDefs.h"
@@ -37,6 +40,12 @@ class SensorNodeUDP : public ApplicationBase, public UdpSocket::ICallback {
     private:
         simsignal_t udpArrival;
         bool ready = false;
+        map<string, string> routes = {
+                {"SN1", "UDPnetworksim.DF1.app[0]"},
+                {"SN2", "UDPnetworksim.DF1.app[0]"},
+                {"SN3", "UDPnetworksim.DF2.app[0]"},
+                {"SN4", "UDPnetworksim.DF2.app[0]"}
+        };
 
     protected:
         enum SelfMsgKinds { START = 1, SEND, STOP };
@@ -51,6 +60,7 @@ class SensorNodeUDP : public ApplicationBase, public UdpSocket::ICallback {
         const char *packetName = nullptr;
 
         const_simtime_t propagationDelay = 0.01;
+        const_simtime_t frequency = 0.5;
 
         queue<simtime_t> udpMsgTimes;
 
@@ -88,6 +98,9 @@ class SensorNodeUDP : public ApplicationBase, public UdpSocket::ICallback {
         virtual void socketClosed(UdpSocket *socket) override;
 
         const char* getDirectDestination(const char* currentMod) const;
+
+        virtual void delayedMsgSend(cMessage* msg, int layer);
+        virtual void finalMsgSend(cMessage* msg, const char* mod, int layer);
 
     public:
         SensorNodeUDP();

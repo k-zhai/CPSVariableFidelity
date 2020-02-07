@@ -108,32 +108,34 @@ void MasterNode::handleMessage(cMessage *msg)
     }
 
     if (ExperimentControl::getInstance().getSwitchStatus()) {
-        if (msg->getKind() == msg_kind::TIMER || msg->getKind() == msg_kind::INIT_TIMER) {
-            // Set time
-            lastDirectMsgTime = simTime();
+        if (ExperimentControl::getInstance().getState() == 1) {
+            if (msg->getKind() == msg_kind::TIMER || msg->getKind() == msg_kind::INIT_TIMER) {
+                // Set time
+                lastDirectMsgTime = simTime();
 
-            // Schedule next TIMER call
-            cMessage* tmMsg = new cMessage(nullptr, msg_kind::TIMER);
-            scheduleAt(simTime() + frequency, tmMsg);
+                // Schedule next TIMER call
+                cMessage* tmMsg = new cMessage(nullptr, msg_kind::TIMER);
+                scheduleAt(simTime() + frequency, tmMsg);
 
-            // Schedule message to be finally sent after propagation delay
-            EV_INFO << "delayedMsgSend " << simTime();
-            delayedMsgSend(msg, ExperimentControl::getInstance().getState());
-        } else if (msg->getKind() == msg_kind::APP_SELF_MSG) {
-            EV_INFO << "finalMsgSend " << simTime();
-            for (std::string s : targets) {
-                std::string targetPath("TCPnetworksim." + s + ".app[0]");
-                finalMsgSend(msg, targetPath.c_str(), ExperimentControl::getInstance().getState());
+                // Schedule message to be finally sent after propagation delay
+                EV_INFO << "delayedMsgSend " << simTime();
+                delayedMsgSend(msg, ExperimentControl::getInstance().getState());
+            } else if (msg->getKind() == msg_kind::APP_SELF_MSG) {
+                EV_INFO << "finalMsgSend " << simTime();
+                for (std::string s : targets) {
+                    std::string targetPath("TCPnetworksim." + s + ".app[0]");
+                    finalMsgSend(msg, targetPath.c_str(), ExperimentControl::getInstance().getState());
+                }
+                delete msg;
+            } else if (msg->getKind() == msg_kind::APP_MSG_RETURNED) {
+                saveData(msg);
+                emit(directArrival, SIMTIME_DBL(simTime()) - SIMTIME_DBL(lastDirectMsgTime));
+                ExperimentControl::getInstance().addDirectStats(lastDirectMsgTime, simTime());
+            } else {
+                delete msg;
             }
-            delete msg;
-        } else if (msg->getKind() == msg_kind::APP_MSG_RETURNED) {
-            saveData(msg);
-            emit(directArrival, SIMTIME_DBL(simTime()) - SIMTIME_DBL(lastDirectMsgTime));
-            ExperimentControl::getInstance().addDirectStats(lastDirectMsgTime, simTime());
-        } else {
-            delete msg;
+            return;
         }
-        return;
     }
 
     if (msg->isSelfMessage()) {

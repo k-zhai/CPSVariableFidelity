@@ -81,21 +81,21 @@ void DFNodeUDP::handleMessageWhenUp(cMessage *msg)
             scheduleAt(simTime() + frequency, tmMsg);
 
             // Schedule message to be finally sent after propagation delay
-            EV_INFO << "delayedMsgSend " << getParentModule()->getName() << " " << simTime();
+            EV_INFO << "delayedMsgSend " << getParentModule()->getName();
             delayedMsgSend(msg, ExperimentControlUDP::getInstance().getState());
         } else if (msg->getKind() == msg_kind::APP_SELF_MSG) {
-            EV_INFO << "finalMsgSend " << getParentModule()->getName() << " " << simTime();
+            EV_INFO << "finalMsgSend " << getParentModule()->getName();
             finalMsgSendRouter(msg, getParentModule()->getName());
-        } else if (msg->getKind() == msg_kind::APP_MSG_RETURNED) {
-            saveData(msg);
-            emit(directArrival, SIMTIME_DBL(simTime()) - SIMTIME_DBL(lastDirectMsgTime));
-            ExperimentControlUDP::getInstance().addDirectStats(lastDirectMsgTime, simTime());
+        } else if (!strcmp(msg->getSenderModule()->getParentModule()->getName(), "M")) {
+            string destination = ExperimentControlUDP::getInstance().getMasterRoute(msg->getKind())[1];
+            destination = "UDPnetworksim." + destination + ".app[0]";
+            cModule *targetModule = getModuleByPath(destination.c_str());
+            sendDirect(msg, targetModule, "appIn");
         } else {
             handleDirectMessage(msg);
         }
     } else if (msg->getKind() == msg_kind::RESTART_UDP) {
         if (ExperimentControlUDP::getInstance().getNewLayer() == 1) {
-            ready = false;
             socket.setOutputGate(gate("socketOut"));
             int localPort = par("localPort");
             const char *localAddress = par("localAddress");
@@ -113,6 +113,23 @@ void DFNodeUDP::handleMessageWhenUp(cMessage *msg)
     } else if (msg->isSelfMessage()) {
         if (msg->getKind() == msg_kind::TIMER) {
             delete msg;
+        } else if (msg->getKind() == msg_kind::DELAY) {
+//            L3Address destAddr = chooseDestAddr(ExperimentControlUDP::getInstance().IDmap[id]);
+//            string s = destAddr.str();
+//            socket.sendTo(&tmp_pk, destAddr, 2000);
+//            std::ostringstream str;
+//            str << packetName << "-" << numSent;
+            delete msg;
+            Packet *packet = new Packet("to SN");
+            if(dontFragment)
+               packet->addTagIfAbsent<FragmentationReq>()->setDontFragment(true);
+            const auto& payload = makeShared<ApplicationPacket>();
+            payload->setChunkLength(B(par("messageLength")));;
+            payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
+            packet->insertAtBack(payload);
+            L3Address destAddr = chooseDestAddr(ExperimentControlUDP::getInstance().IDmap[id]);
+            string s = destAddr.str();
+            socket.sendTo(packet, destAddr, 2000);
         } else {
             ASSERT(msg == selfMsg);
             switch (selfMsg->getKind()) {
@@ -132,76 +149,63 @@ void DFNodeUDP::handleMessageWhenUp(cMessage *msg)
                     throw cRuntimeError("Invalid kind %d in self message", (int)selfMsg->getKind());
             }
         }
-    } else if (msg->getKind() == msg_kind_transport::DIRECT_TO_APP) {
-        delete msg;
     } else {
         socket.processMessage(msg);
+        ASSERT(msg->getKind() != msg_kind::DELAY);
     }
 }
 
 void DFNodeUDP::handleDirectMessage(cMessage *msg) {
     if (ExperimentControlUDP::getInstance().getState() == 1) {
         if (msg->getKind() == msg_kind::APP_MSG_SENT) {
+//            Packet *packet = check_and_cast<Packet *>(msg);
+//            saveData(packet);
             delete msg;
-            msg = new cMessage(nullptr, msg_kind::APP_SELF_MSG_CLIENT);
-            scheduleAt(simTime() + propagationDelay, msg);
-        } else if (msg->getKind() == msg_kind::APP_SELF_MSG_CLIENT) {
-            msg->setKind(msg_kind::APP_MSG_RETURNED);
-            cModule* targetModule = getModuleByPath("UDPnetworksim.M.app[0]");
-            sendDirect(msg, targetModule, "appIn");
         } else if (msg->getKind() == msg_kind::STOP_UDP) {
-            if (udpMsgTimes.empty() && !ready) {
-                ExperimentControlUDP::getInstance().incrementNumReady();
-                ready = true;
+            socket.destroy();
+            if (selfMsg->isSelfMessage()) {
+                cancelEvent(selfMsg);
             }
 
-            if (ExperimentControlUDP::getInstance().getNumNodes() == ExperimentControlUDP::getInstance().getNumReady()) {
-                socket.destroy();
-                if (selfMsg->isSelfMessage()) {
-                    cancelEvent(selfMsg);
-                }
+            delete msg;
 
-                delete msg;
-            } else {
-                scheduleAt(simTime() + 0.01, msg);
-            }
-
-        } else if (msg != selfMsg) {
-            if (ExperimentControlUDP::getInstance().getNumNodes() == ExperimentControlUDP::getInstance().getNumReady()) {
-                delete msg;
-            } else {
-                socket.processMessage(msg);
-            }
-        } else {
-            if (ExperimentControlUDP::getInstance().getSwitchStatus() && ExperimentControlUDP::getInstance().getNewLayer() == 1) {
-                delete msg;
-                return;
-            }
-
-            ASSERT(msg == selfMsg);
-            switch (selfMsg->getKind()) {
-                case START:
-                    processStart();
-                    break;
-
-                case SEND:
-                    processSend();
-                    break;
-
-                case STOP:
-                    processStop();
-                    break;
-
-                default:
-                    throw cRuntimeError("Invalid kind %d in self message", (int)selfMsg->getKind());
-            }
         }
+//        } else if (msg != selfMsg) {
+//            if (ExperimentControlUDP::getInstance().getNumNodes() == ExperimentControlUDP::getInstance().getNumReady()) {
+//                delete msg;
+//            } else {
+//                socket.processMessage(msg);
+//            }
+//        } else {
+//            if (ExperimentControlUDP::getInstance().getSwitchStatus() && ExperimentControlUDP::getInstance().getNewLayer() == 1) {
+//                delete msg;
+//                return;
+//            }
+//
+//            ASSERT(msg == selfMsg);
+//            switch (selfMsg->getKind()) {
+//                case START:
+//                    processStart();
+//                    break;
+//
+//                case SEND:
+//                    processSend();
+//                    break;
+//
+//                case STOP:
+//                    processStop();
+//                    break;
+//
+//                default:
+//                    throw cRuntimeError("Invalid kind %d in self message", (int)selfMsg->getKind());
+//            }
+//        }
     }
 }
 
-void DFNodeUDP::saveData(cMessage* msg) {
-    data.push_back("data");
-    delete msg;
+void DFNodeUDP::saveData(Packet* pk) {
+    data.push(*pk);
+    delete pk;
 }
 
 void DFNodeUDP::delayedMsgSend(cMessage* msg, int layer) {
@@ -247,19 +251,8 @@ void DFNodeUDP::finalMsgSendRouter(cMessage* msg, const char* currentMod) {
         if (!msg->isSelfMessage()) {
             error("Must be self message");
         }
-        if (strcmp(currentMod, "DF1") == 0) {
-            for (std::string s : DF1targets) {
-                std::string targetPath("UDPnetworksim." + s + ".app[0]");
-                finalMsgSend(msg, targetPath.c_str(), ExperimentControlUDP::getInstance().getState());
-            }
-        } else if (strcmp(currentMod, "DF2") == 0) {
-            for (std::string s : DF2targets) {
-                std::string targetPath("UDPnetworksim." + s + ".app[0]");
-                finalMsgSend(msg, targetPath.c_str(), ExperimentControlUDP::getInstance().getState());
-            }
-        } else {
-            error("Current module not valid");
-        }
+        std::string targetPath("UDPnetworksim.M.app[0]");
+        finalMsgSend(msg, targetPath.c_str(), ExperimentControlUDP::getInstance().getState());
         delete msg;
     }
 }
@@ -268,19 +261,19 @@ void DFNodeUDP::socketDataArrived(UdpSocket *socket, Packet *pk)
 {
     // determine its source address/port
     L3Address remoteAddress = pk->getTag<L3AddressInd>()->getSrcAddress();
-    string check = remoteAddress.str();
-    if (strcmp(remoteAddress.str().c_str(), "10.0.0.10") == 0 || strcmp(remoteAddress.str().c_str(), "10.0.0.22") == 0) { // ideally use map<module, ip> in EC
-        processPacket(pk);
+    if (!strcmp(remoteAddress.str().c_str(), "10.0.0.10") || !strcmp(remoteAddress.str().c_str(), "10.0.0.22")) { // ideally use map<module, ip> in EC
+//        if(dontFragment)
+//            pk->addTagIfAbsent<FragmentationReq>()->setDontFragment(true);
+//        const auto& payload = makeShared<ApplicationPacket>();
+//        payload->setChunkLength(B(par("messageLength")));
+//        payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
+//        pk->insertAtBack(payload);
+        ASSERT(!pk->isSelfMessage());
+        id = pk->getId();
+        cMessage *delayMsg = new cMessage("DELAY_MSG", msg_kind::DELAY);
+        scheduleAt(simTime() + 0.02, delayMsg);
     } else {
-        int srcPort = pk->getTag<L4PortInd>()->getSrcPort();
-        pk->clearTags();
-        pk->trim();
-
-        // statistics
-        numEchoed++;
-        emit(packetSentSignal, pk);
-        // send back
-        socket->sendTo(pk, remoteAddress, srcPort);
+        saveData(pk);
     }
 }
 
@@ -349,23 +342,33 @@ void DFNodeUDP::handleCrashOperation(LifecycleOperation *operation)
 
 /* -------------------------------------------------------------------------------------------------------------------------------------------------- */
 
-L3Address DFNodeUDP::chooseDestAddr()
+L3Address DFNodeUDP::chooseDestAddr(short kind)
 {
-    int k = intrand(destAddresses.size());
-    if (destAddresses[k].isUnspecified() || destAddresses[k].isLinkLocal()) {
-        L3AddressResolver().tryResolve(destAddressStr[k].c_str(), destAddresses[k]);
+    // need to route based on map in ExperimentControl
+
+    if (strcmp(ExperimentControlUDP::getInstance().getMasterRoute(kind)[0].c_str(), "none")) {
+        string destination = ExperimentControlUDP::getInstance().getMasterRoute(kind)[1];
+
+        cStringTokenizer tokenizer(destination.c_str());
+        const char *token;
+
+        L3Address result;
+        while ((token = tokenizer.nextToken()) != nullptr) {
+           L3AddressResolver().tryResolve(token, result);
+        }
+
+        return result;
+    } else {
+        int k = intrand(destAddresses.size());
+        if (destAddresses[k].isUnspecified() || destAddresses[k].isLinkLocal()) {
+            L3AddressResolver().tryResolve(destAddressStr[k].c_str(), destAddresses[k]);
+        }
+        return destAddresses[k];
     }
-    return destAddresses[k];
 }
 
 void DFNodeUDP::sendPacket()
 {
-    if (ExperimentControlUDP::getInstance().getSwitchStatus() && ExperimentControlUDP::getInstance().getState() == 1 && ExperimentControlUDP::getInstance().getNumNodes() == ExperimentControlUDP::getInstance().getNumReady()) {
-        return;
-    }
-
-    udpMsgTimes.push(simTime());
-
     std::ostringstream str;
     str << packetName << "-" << numSent;
     Packet *packet = new Packet(str.str().c_str());

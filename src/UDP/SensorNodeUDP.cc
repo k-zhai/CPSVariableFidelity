@@ -110,10 +110,6 @@ L3Address SensorNodeUDP::chooseDestAddr()
 
 void SensorNodeUDP::sendPacket()
 {
-    if (ExperimentControlUDP::getInstance().getSwitchStatus() && ExperimentControlUDP::getInstance().getState() == 1 && ExperimentControlUDP::getInstance().getNumNodes() == ExperimentControlUDP::getInstance().getNumReady()) {
-        return;
-    }
-
     udpMsgTimes.push(simTime());
 
     std::ostringstream str;
@@ -185,44 +181,36 @@ void SensorNodeUDP::processStop()
 
 void SensorNodeUDP::handleMessageWhenUp(cMessage *msg)
 {
-    if (msg->getKind() == msg_kind::APP_MSG_SENT) {
-        delete msg;
-        msg = new cMessage(nullptr, msg_kind::APP_SELF_MSG);
-        scheduleAt(simTime() + propagationDelay, msg);
-    } else if (msg->getKind() == msg_kind::APP_SELF_MSG) {
-        msg->setKind(msg_kind::APP_MSG_RETURNED);
-        cModule* targetModule = getModuleByPath(getDirectDestination(getParentModule()->getName()));
-        sendDirect(msg, targetModule, "appIn");
+    if (ExperimentControlUDP::getInstance().getState() == 1) {
+        if (msg->getKind() == msg_kind::TIMER || msg->getKind() == msg_kind::INIT_TIMER) {
+            // Schedule next TIMER call
+            cMessage* tmMsg = new cMessage("timer", msg_kind::TIMER);
+            scheduleAt(simTime() + frequency, tmMsg);
+
+            // Schedule message to be finally sent after propagation delay
+            EV_INFO << "delayedMsgSend " << getParentModule()->getName();
+            delayedMsgSend(msg, ExperimentControlUDP::getInstance().getState());
+        } else if (msg->getKind() == msg_kind::APP_SELF_MSG) {
+            EV_INFO << "finalMsgSend " << getParentModule()->getName();
+            finalMsgSend(msg, routes.find(getParentModule()->getName())->second.c_str(), ExperimentControlUDP::getInstance().getState());
+            delete msg;
+        } else if (msg->getKind() >= (short)50) {
+            // Do command
+            delete msg;
+        } else {
+            delete msg;
+        }
     } else if (msg->getKind() == msg_kind::STOP_UDP) {
-//         check if udpMsgTimes is empty, packet consistency
-         if (udpMsgTimes.empty() && !ready) {
-             ExperimentControlUDP::getInstance().incrementNumReady();
-             ready = true;
-         }
-
-         if (ExperimentControlUDP::getInstance().getNumNodes() == ExperimentControlUDP::getInstance().getNumReady()) {
-             socket.destroy();
-             if (selfMsg->isSelfMessage()) {
-                 cancelEvent(selfMsg);
-             }
-
-             delete msg;
-         } else {
-             scheduleAt(simTime() + 0.01, msg);
-         }
-
+        socket.destroy();
+        if (selfMsg->isSelfMessage()) {
+            cancelEvent(selfMsg);
+        }
+        delete msg;
     } else if (msg->getKind() == msg_kind::RESTART_UDP) {
-        ready = false;
         selfMsg = new cMessage("restart", START);
         scheduleAt(simTime(), selfMsg);
         delete msg;
     } else if (msg->isSelfMessage()) { // sending
-        // TODO send as direct rather than deleting
-        if (ExperimentControlUDP::getInstance().getSwitchStatus() && ExperimentControlUDP::getInstance().getNewLayer() == 1) {
-            delete msg;
-            return;
-        }
-
         ASSERT(msg == selfMsg);
         switch (selfMsg->getKind()) {
             case START:
@@ -240,10 +228,42 @@ void SensorNodeUDP::handleMessageWhenUp(cMessage *msg)
             default:
                 throw cRuntimeError("Invalid kind %d in self message", (int)selfMsg->getKind());
         }
-    } else if (msg->getKind() == msg_kind_transport::DIRECT_TO_APP) {
-        delete msg;
     } else { // receiving
         socket.processMessage(msg);
+    }
+}
+
+void SensorNodeUDP::delayedMsgSend(cMessage* msg, int layer) {
+    switch (layer) {
+        case 1:
+            delete msg;
+            msg = new cMessage(nullptr, msg_kind::APP_SELF_MSG);
+            scheduleAt(simTime() + propagationDelay, msg);
+            break;
+        case 2:
+            break;
+        default:
+            error("Invalid route");
+            break;
+    }
+}
+
+void SensorNodeUDP::finalMsgSend(cMessage* msg, const char* mod, int layer) {
+    switch (layer) {
+        case 1:
+            if (msg->getKind() == msg_kind::APP_SELF_MSG) {
+                cMessage *tmp = new cMessage(nullptr, msg_kind::APP_MSG_SENT);
+                cModule *targetModule = getModuleByPath(mod);
+                sendDirect(tmp, targetModule, "appIn");
+            } else {
+                error("Must be a self message with kind APP_SELF_MSG");
+            }
+            break;
+        case 2:
+            break;
+        default:
+            error("Invalid route");
+            break;
     }
 }
 
@@ -258,7 +278,7 @@ const char* SensorNodeUDP::getDirectDestination(const char* currentMod) const {
 
 void SensorNodeUDP::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
-    // process incoming packet
+    // process incoming packet, this is where it executes instruction sent down from MasterNode
     processPacket(packet);
 }
 
@@ -285,6 +305,8 @@ void SensorNodeUDP::refreshDisplay()
 
 void SensorNodeUDP::processPacket(Packet *pk)
 {
+    // get instructions based on msg_kind
+
     emit(packetReceivedSignal, pk);
     EV_INFO << "Received packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
     delete pk;

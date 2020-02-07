@@ -57,6 +57,7 @@ void ExperimentControl::handleMessage(cMessage* msg) {
         } else if (getInstance().state == 2) {
             cMessage* startMsg = new cMessage("start_L4", msg_kind_transport::L4_START);
             sendToTargets(startMsg);
+            sendToSources(startMsg);
             delete msg;
         }
 
@@ -76,6 +77,7 @@ void ExperimentControl::handleMessage(cMessage* msg) {
             } else if (getInstance().state == 2) {
                 cMessage* stopMsg = new cMessage("stop_L4", msg_kind_transport::L4_STOP);
                 sendToTargets(stopMsg);
+                sendToSources(stopMsg);
                 delete stopMsg;
                 delete msg;
             }
@@ -116,7 +118,7 @@ void ExperimentControl::sendToSources(cMessage *msg) {
     } else if (getInstance().state == 2) {
         for (std::string s : sources) {
             std::string targetPath("TCPnetworksim." + s + ".tcp");
-            sendDirect(new cMessage("to source", msg->getKind()), getModuleByPath(targetPath.c_str()), "transportIn");
+            sendDirect(new cMessage("to source", msg->getKind()), getModuleByPath(targetPath.c_str()), "L4In");
         }
     }
 }
@@ -130,7 +132,7 @@ void ExperimentControl::sendToTargets(cMessage *msg) {
     } else if (getInstance().state == 2) {
         for (std::string s : targets) {
             std::string targetPath("TCPnetworksim." + s + ".tcp");
-            sendDirect(new cMessage("to target", msg->getKind()), getModuleByPath(targetPath.c_str()), "transportIn");
+            sendDirect(new cMessage("to target", msg->getKind()), getModuleByPath(targetPath.c_str()), "L4In");
         }
     }
 }

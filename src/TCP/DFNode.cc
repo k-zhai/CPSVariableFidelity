@@ -121,28 +121,30 @@ void DFNode::sendBack(cMessage *msg)
 void DFNode::handleMessage(cMessage *msg)
 {
     if (ExperimentControl::getInstance().getSwitchStatus()) {
-        if (msg->getKind() == msg_kind::TIMER || msg->getKind() == msg_kind::INIT_TIMER) {
-            // Set time
-            lastDirectMsgTime = simTime();
+        if (ExperimentControl::getInstance().getState() == 1) {
+            if (msg->getKind() == msg_kind::TIMER || msg->getKind() == msg_kind::INIT_TIMER) {
+                // Set time
+                lastDirectMsgTime = simTime();
 
-            // Schedule next TIMER call
-            cMessage* tmMsg = new cMessage(nullptr, msg_kind::TIMER);
-            scheduleAt(simTime() + frequency, tmMsg);
+                // Schedule next TIMER call
+                cMessage* tmMsg = new cMessage(nullptr, msg_kind::TIMER);
+                scheduleAt(simTime() + frequency, tmMsg);
 
-            // Schedule message to be finally sent after propagation delay
-            EV_INFO << "delayedMsgSend " << simTime();
-            delayedMsgSend(msg, ExperimentControl::getInstance().getState());
-        } else if (msg->getKind() == msg_kind::APP_SELF_MSG) {
-            EV_INFO << "finalMsgSend " << simTime();
-            finalMsgSendRouter(msg, getParentModule()->getName());
-        } else if (msg->getKind() == msg_kind::APP_MSG_RETURNED) {
-            saveData(msg);
-            emit(directArrival, SIMTIME_DBL(simTime()) - SIMTIME_DBL(lastDirectMsgTime));
-            ExperimentControl::getInstance().addDirectStats(lastDirectMsgTime, simTime());
-        } else {
-            handleDirectMessage(msg);
+                // Schedule message to be finally sent after propagation delay
+                EV_INFO << "delayedMsgSend " << simTime();
+                delayedMsgSend(msg, ExperimentControl::getInstance().getState());
+            } else if (msg->getKind() == msg_kind::APP_SELF_MSG) {
+                EV_INFO << "finalMsgSend " << simTime();
+                finalMsgSendRouter(msg, getParentModule()->getName());
+            } else if (msg->getKind() == msg_kind::APP_MSG_RETURNED) {
+                saveData(msg);
+                emit(directArrival, SIMTIME_DBL(simTime()) - SIMTIME_DBL(lastDirectMsgTime));
+                ExperimentControl::getInstance().addDirectStats(lastDirectMsgTime, simTime());
+            } else {
+                handleDirectMessage(msg);
+            }
+            return;
         }
-        return;
     }
 
     if (msg->getKind() == msg_kind::RESTART_TCP) {

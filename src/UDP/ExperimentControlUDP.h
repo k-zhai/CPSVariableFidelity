@@ -18,12 +18,14 @@
 
 #include <vector>
 #include <string>
+#include <map>
 #include <omnetpp.h>
 #include <inet/transportlayer/udp/pathTrackingUDP.h>
 
 using namespace omnetpp;
 using std::string;
 using std::vector;
+using std::map;
 
 enum msg_kind : short int {
     APP_SELF_MSG = 11,
@@ -37,6 +39,12 @@ enum msg_kind : short int {
     RECORD_TIME = 19,
     START_MSG = 20,
     END_MSG = 21,
+    DELAY = 22,
+    DIRECT_FROM_MASTER = 23,
+    MSG_1 = 100,
+    MSG_2 = 200,
+    MSG_3 = 300,
+    MSG_4 = 400,
 };
 
 namespace inet {
@@ -52,14 +60,22 @@ class ExperimentControlUDP : public cSimpleModule {
 
         bool stopSent = false;
 
+        // msg_kind, destination
+        map<short, vector<string>> routingFromMaster = {
+                {50, {"DF1", "SN1"}},
+                {51, {"DF1", "SN2"}},
+                {52, {"DF2", "SN3"}},
+                {53, {"DF2", "SN4"}}
+        };
+
     protected:
         const int currentLayer = 5; // number of layers simulated initially
-        const int newLayer = 2; // number of layers simulated after switch
+        const int newLayer = 1; // number of layers simulated after switch
         const_simtime_t start_time = 100;
         const_simtime_t end_time = 200;
 
-        vector<string> sources = {"DF1", "DF2", "M"};
-        vector<string> targets = {"SN1", "SN2", "SN3", "SN4", "DF1", "DF2"};
+        vector<string> upstream = {"M"};
+        vector<string> downstream = {"SN1", "SN2", "SN3", "SN4", "DF1", "DF2"};
 
         virtual void initialize() override;
         virtual void handleMessage(cMessage* msg) override;
@@ -78,12 +94,15 @@ class ExperimentControlUDP : public cSimpleModule {
         cHistogram *udpMsgStats = new cHistogram("udpMsgStats");
         cHistogram *directMsgStats = new cHistogram("directMsgStats");
 
+        // msg_id, msg_kind
+        map<long, short> IDmap;
+
         int getState() const;
         bool getSwitchStatus() const;
         void setState();
 
-        void sendToSources(cMessage *msg);
-        void sendToTargets(cMessage *msg);
+        void sendToUpstream(cMessage *msg);
+        void sendToDownstream(cMessage *msg);
 
         void addUdpStats(simtime_t previousTime, simtime_t currentTime);
         void addDirectStats(simtime_t previousTime, simtime_t currentTime);
@@ -98,6 +117,8 @@ class ExperimentControlUDP : public cSimpleModule {
 
         void incrementNumNodes();
         void incrementNumReady();
+
+        vector<string> getMasterRoute(short kind);
 
         virtual void finish() override;
 };
